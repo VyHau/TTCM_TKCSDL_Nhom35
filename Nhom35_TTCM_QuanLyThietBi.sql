@@ -346,3 +346,228 @@ CREATE TABLE tbChiTietYeuCau_BanGiao (
         ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 Go
+-- =============================================
+-- 1. DỮ LIỆU DANH MỤC & CẤU HÌNH (GIỮ NGUYÊN CỦA BẠN)
+-- =============================================
+INSERT INTO tbQuyenHan (ID_QuyenHan, TenQuyenHan, MoTa) VALUES
+('QH001', N'Xem', N'Chỉ được xem dữ liệu'),
+('QH002', N'Thêm', N'Được phép thêm mới'),
+('QH003', N'Sửa', N'Được phép chỉnh sửa'),
+('QH004', N'Xóa', N'Được phép xóa dữ liệu'),
+('QH005', N'Duyệt', N'Quyền phê duyệt yêu cầu'),
+('QH006', N'Báo cáo', N'Xuất các báo cáo thống kê'),
+('QH007', N'Quản trị', N'Toàn quyền hệ thống');
+
+INSERT INTO tbVaiTro (ID_VaiTro, TenVaiTro) VALUES
+('VT001', N'Admin'),
+('VT002', N'Ban Giám Hiệu'),
+('VT003', N'Trưởng Khoa'),
+('VT004', N'Phòng CSVC'),
+('VT005', N'Phòng KHTC'),
+('VT006', N'Giảng viên'),
+('VT007', N'Sinh viên');
+
+INSERT INTO tbKhoa_PhongBan (ID_KhoaPhongBan, TenPhongBanKhoa) VALUES
+('K01', N'Khoa Công nghệ số'),
+('K02', N'Khoa Cơ khí'),
+('K03', N'Khoa Điện - Điện tử'),
+('K04', N'Khoa KT Xây dựng'),
+('K05', N'Khoa Sư phạm Công nghiệp'),
+('P01', N'Phòng Cơ sở vật chất'),
+('P02', N'Phòng Kế hoạch Tài chính');
+
+INSERT INTO tbCoSo (ID_CoSo, TenCoSo) VALUES
+('CS01', N'Cơ sở 1'),
+('CS02', N'Cơ sở 2');
+
+INSERT INTO tbDanhMuc (ID_DanhMuc, TenDanhMuc, MoTa) VALUES
+('DM01', N'Thiết bị CNTT', N'Máy tính bàn, Laptop, Server, Workstation'),
+('DM02', N'Thiết bị Trình chiếu', N'Máy chiếu, Màn hình tương tác, Tivi'),
+('DM03', N'Thiết bị Mạng & Viễn thông', N'Router, Switch, Access Point, Tổng đài'),
+('DM04', N'Thiết bị Đo lường & Thí nghiệm', N'Dao động ký, Đồng hồ vạn năng, Nguồn DC'),
+('DM05', N'Máy Công cụ & Cơ khí', N'Máy phay CNC, Máy tiện, Máy hàn, Robot tay máy'),
+('DM06', N'Kit & Bo mạch nhúng', N'Kit FPGA, Raspberry Pi, Arduino, PLC'),
+('DM07', N'Thiết bị Âm thanh', N'Loa hội trường, Micro, Amply, Mixer');
+GO
+
+INSERT INTO tbNhaCungCap (ID_NhaCC, TenNhaCC, LoaiDichVu, DiaChi, SDT) VALUES
+('NCC001', N'FPT Trading', N'Cung cấp', N'KCN Đà Nẵng', '0905111222'),
+('NCC002', N'Phong Vũ', N'Cung cấp', N'Lê Duẩn, ĐN', '0905333444'),
+('NCC003', N'Điện máy Xanh', N'Bảo trì', N'Nguyễn Văn Linh, ĐN', '18001061'),
+('NCC004', N'Cơ khí Hòa Phát', N'Cung cấp', N'Hòa Khánh, ĐN', '0914555666'),
+('NCC005', N'Daikin Service', N'Sửa chữa', N'Hải Châu, ĐN', '18006777'),
+('NCC006', N'Thiết bị GD Sao Mai', N'Cung cấp', N'Thanh Khê, ĐN', '0935888999'),
+('NCC007', N'Viettel IDC', N'Khác', N'Hòa Cường, ĐN', '0969000111');
+
+INSERT INTO tbLoaiYeuCau (ID_LoaiYeuCau, TenLoaiYeuCau) VALUES
+('LYC01', N'Yêu cầu sử dụng thiết bị'),
+('LYC02', N'Yêu cầu sử dụng thiết bị ngoài khoa'),
+('LYC03', N'Yêu cầu Sửa chữa'),
+('LYC04', N'Yêu cầu mua sắm thiết bị'),
+('LYC05', N'Báo cáo tình trạng thiết bị mua sắm'),
+('LYC06', N'Yêu cầu bàn giao'),
+('LYC07', N'Báo cáo sự cố thiết bị');
+
+INSERT INTO tbTiet (ID_Tiet, GioBD, ThoiLuong) VALUES
+('T01', '07:00:00', 60),
+('T02', '08:00:00', 60),
+('T03', '09:00:00', 60),
+('T04', '10:00:00', 60),
+('T05', '11:00:00', 60),
+('T06', '12:00:00', 60),
+('T07', '13:00:00', 60),
+('T08', '14:00:00', 60),
+('T09', '15:00:00', 60),
+('T10', '16:00:00', 60),
+('T11', '17:00:00', 60),
+('T12', '18:00:00', 60),
+('T13', '19:00:00', 60),
+('T14', '20:00:00', 60);
+
+-- =============================================
+-- 2. DỮ LIỆU CẤP 2 (NGƯỜI DÙNG & KHU VỰC) (GIỮ NGUYÊN CỦA BẠN)
+-- =============================================
+-- Admin (VT001) có toàn quyền, Sinh viên (VT007) chỉ được Xem
+INSERT INTO tbQuyenHan_VaiTro (QuyenHanNo, VaiTroNo, TrangThai) VALUES
+('QH001', 'VT001', 1), -- Admin được Xem
+('QH002', 'VT001', 1), -- Admin được Thêm
+('QH004', 'VT001', 1), -- Admin được Xóa
+('QH007', 'VT001', 1), -- Admin Toàn quyền
+('QH001', 'VT007', 1); -- Sinh viên được Xem 
+
+INSERT INTO tbKhuVuc (ID_KhuVuc, CoSoNo, TenKhuVuc) VALUES
+('KV01', 'CS01', N'Khu A'),
+('KV02', 'CS01', N'Khu B'),
+('KV03', 'CS01', N'Khu C'),
+('KV04', 'CS01', N'Khu D (Xưởng)'),
+('KV05', 'CS02', N'Khu A'),
+('KV06', 'CS02', N'Khu B'),
+('KV07', 'CS02', N'Hội Trường');
+
+INSERT INTO tbNguoiDung (ID_NguoiDung, KhoaPhongBanNo, VaiTroNo, Email, MatKhau, HoTen, NgaySinh, TrangThaiTK) VALUES
+('ND001', 'P01', 'VT001', 'admin@ute.udn.vn', '123', N'Nguyễn Quản Trị', '1990-01-01', 1),
+('ND002', 'K01', 'VT003', 'truongkhoa.cntt@ute.udn.vn', '123', N'Trần Văn Trưởng', '1980-05-15', 1),
+('ND003', 'K01', 'VT006', 'gv.cntt01@ute.udn.vn', '123', N'Lê Thị Giảng Viên', '1992-08-20', 1),
+('ND004', 'K02', 'VT006', 'gv.cokhi01@ute.udn.vn', '123', N'Phạm Kỹ Thuật', '1985-03-10', 1),
+('ND005', 'K01', 'VT007', 'sv.cntt01@ute.udn.vn', '123', N'Hoàng Sinh Viên', '2003-11-25', 1),
+('ND006', 'P01', 'VT004', 'nv.csvc@ute.udn.vn', '123', N'Đỗ Cơ Sở', '1995-07-07', 1),
+('ND007', 'P02', 'VT005', 'nv.khtc@ute.udn.vn', '123', N'Vũ Tài Chính', '1993-12-12', 1);
+
+-- Ghi nhận thời gian hiệu lực của vai trò người dùng
+INSERT INTO tbVaiTro_NguoiDung (VaiTroNo, NguoiDungNo, NgayHieuLuc, NgayHetHieuLuc) VALUES
+('VT001', 'ND001', '2023-01-01', '2030-01-01'), -- ND001 làm Admin từ 2023 đến 2030
+('VT003', 'ND002', '2023-05-01', '2028-05-01'), -- ND002 làm Trưởng khoa nhiệm kỳ 5 năm
+('VT007', 'ND005', '2023-09-01', '2027-09-01'); -- ND005 là Sinh viên khóa 2023-2027
+
+INSERT INTO tbThongBao (ID_ThongBao, NguoiTaoNo, TieuDe, NoiDung, LoaiThongBao) VALUES
+('TB001', 'ND001', N'Lịch bảo trì hệ thống', N'Hệ thống sẽ bảo trì vào chủ nhật tuần này.', N'Hệ thống'),
+('TB002', 'ND002', N'Nhắc nhở nộp báo cáo', N'Các giảng viên nộp báo cáo kiểm kê trước ngày 30.', N'Nhóm');
+
+--Bảng tbThongBao_NguoiDung (Gửi thông báo cho ai)
+INSERT INTO tbThongBao_NguoiDung (ThongBaoNo, NguoiNhanNo, TrangThaiDoc) VALUES
+('TB001', 'ND005', 0), -- Gửi cho Sinh viên, chưa đọc
+('TB002', 'ND003', 1); -- Gửi cho Giảng viên, đã đọc
+
+INSERT INTO tbTaiLieu (ID_TaiLieu, DonViQuanLy, TenTaiLieu, SoHieu, NgayPhatHanh, DuongDanFile, TrangThaiApDung) VALUES
+('TL001', 'P01', N'Quy định sử dụng tài sản công', '01/QD-CSVC', '2023-01-01', '/files/quydinh_tsc.pdf', 1),
+('TL002', 'P02', N'Định mức chi tiêu mua sắm', '05/QD-KHTC', '2023-02-15', '/files/dinhmuc_2023.pdf', 1),
+('TL003', 'P01', N'Biểu mẫu đề nghị sửa chữa', 'BM-03', '2022-06-01', '/files/bm_suachua.docx', 1),
+('TL004', 'K01', N'Nội quy phòng máy tính', 'NQ-CNTT', '2023-08-20', '/files/noiquy_lab.pdf', 1),
+('TL005', 'P01', N'Biểu mẫu bàn giao thiết bị', 'BM-05', '2022-06-01', '/files/bm_bangiao.docx', 1),
+('TL006', 'K02', N'Hướng dẫn an toàn xưởng', 'HD-CK', '2023-01-10', '/files/hd_antoan.pdf', 1),
+('TL007', 'P01', N'Quy trình thanh lý tài sản', 'QT-TL', '2023-12-01', '/files/qt_thanhly.pdf', 1);
+
+-- =============================================
+-- 3. DỮ LIỆU CẤP 3 (PHÒNG & THIẾT BỊ)
+-- =============================================
+
+INSERT INTO tbPhong (ID_Phong, KhuVucNo, TenPhong, SucChua) VALUES
+('A101', 'KV01', N'Phòng học lý thuyết', 60),
+('A102', 'KV01', N'Phòng học lý thuyết', 60),
+('B201', 'KV02', N'Phòng máy 1', 40),
+('B202', 'KV02', N'Phòng máy 2', 40),
+('C305', 'KV03', N'Hội trường C', 200),
+('D001', 'KV04', N'Xưởng thực hành CNC', 30),
+('E101', 'KV05', N'Phòng Lab Cơ bản', 50);
+
+-- Lớp thực hành CSDL học tại phòng B201 vào tiết 1 thứ 2
+INSERT INTO tbLopHocPhan (ID_LHP, PhongNo, TietNo, Thu, SiSo, TenLHP, HocKy) VALUES
+('LHP01', 'B201', 'T01', N'Thứ 2', 40, N'Thực hành CSDL Nhóm 35', N'1/2025-2026'),
+('LHP02', 'D001', 'T06', N'Thứ 3', 30, N'Thực tập CNC', N'1/2025-2026');
+
+INSERT INTO tbThietBi (ID_ThietBi, DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri) VALUES
+('PC01', 'DM01', 'NCC001', 'K01', N'PC Dell Optiplex 7090', N'Sẵn sàng', 15000000, N'Core i7-12700, RAM 16GB, SSD 512GB', 'SN-DELL-001'),
+('PC02', 'DM01', 'NCC001', 'K01', N'Workstation HP Z4', N'Đang sử dụng', 45000000, N'Xeon W-2223, RAM 32GB, Quadro P2200', 'SN-HP-WORK-01'),
+('PRJ01', 'DM02', 'NCC002', 'P01', N'Máy chiếu Panasonic PT-LB', N'Sẵn sàng', 18000000, N'4100 Ansi Lumens, XGA, HDMI', 'SN-PANA-99'),
+('CNC01', 'DM05', 'NCC004', 'K02', N'Máy phay CNC Mini', N'Sửa chữa', 120000000, N'Hành trình 300x400mm, Trục chính 24000rpm', 'SN-CNC-X1'),
+('HAN01', 'DM05', 'NCC004', 'K02', N'Máy hàn TIG Jasic', N'Sẵn sàng', 8500000, N'200A, Hàn inox/sắt', 'SN-HAN-JS01'),
+('OSC01', 'DM04', 'NCC001', 'K03', N'Dao động ký Tektronix', N'Sẵn sàng', 12500000, N'100MHz, 2 Kênh, Digital Storage', 'SN-TEK-105'),
+('PLC01', 'DM06', 'NCC001', 'K03', N'Bộ thực hành PLC Mitsubishi', N'Hư hỏng', 25000000, N'FX3U, Kèm module Analog', 'SN-PLC-M01');
+GO
+
+INSERT INTO tbPhong_ThietBi (ThietBiNo, PhongNo, NgayHieuLuc) VALUES
+('PC01', 'B201', '2026-01-01'),
+('PC02', 'B201', '2026-01-01'),
+('PRJ01', 'A101', '2026-05-15'),
+('CNC01', 'D001', '2026-01-01'),
+('HAN01', 'D001', '2026-06-20'),
+('PC01', 'B202', '2026-02-01'), 
+('OSC01', 'E101', '2026-01-10');
+
+INSERT INTO tbThietBi_NguoiDung (ThietBiNo, NguoiDungNo, TrangThai) VALUES
+('PC02', 'ND002', 1), -- Trưởng khoa dùng Workstation
+('PC02', 'ND003', 0), 
+('PC01', 'ND005', 1), -- Sinh viên mượn PC
+('OSC01', 'ND004', 1),
+('PRJ01', 'ND006', 1),-- CSVC giữ máy chiếu
+('CNC01', 'ND004', 1);
+
+INSERT INTO tbYeuCau (ID_YeuCau, NguoiTaoNo, LoaiYeuCauNo, TrangThai, NgayTao, NgayDuKienXL, NgayXuLy) VALUES
+('YC001', 'ND005', 'LYC01', N'Chờ xử lý', '2025-09-01', '2025-09-02', NULL),
+('YC002', 'ND002', 'LYC02', N'Đã duyệt', '2025-09-05', '2025-09-10', '2025-09-08'),
+('YC003', 'ND003', 'LYC03', N'Chờ xử lý', '2025-09-06', '2025-09-07', NULL),
+('YC004', 'ND004', 'LYC01', N'Đã duyệt', '2025-09-07', '2025-09-07', '2025-09-07'),
+('YC005', 'ND002', 'LYC02', N'Từ chối', '2025-09-10', '2025-09-15', '2025-09-12'),
+('YC006', 'ND006', 'LYC03', N'Đã duyệt', '2025-09-11', '2025-09-12', '2025-09-11'),
+('YC007', 'ND005', 'LYC01', N'Đã hủy', '2025-09-12', '2025-09-13', NULL);
+
+INSERT INTO tbChiTietYeuCau_SuDung (YeuCauNo, ThietBiNo, TietBDNo, TietKTNo, LyDoMuon, NgayMuon) VALUES
+('YC001', 'PC01', 'T01', 'T03', N'Học thực hành', '2026-09-03'),
+('YC001', 'PC02', 'T01', 'T03', N'Học thực hành', '2026-09-03'),
+('YC004', 'CNC01', 'T06', 'T07', N'Dạy thực hành CNC', '2026-09-08'),
+('YC007', 'OSC01', 'T01', 'T02', N'Làm đồ án', '2026-09-15'),
+('YC004', 'HAN01', 'T01', 'T05', N'Mượn đi hội thảo', '2026-09-09'),
+('YC001', 'OSC01', 'T04', 'T05', N'Đo đạc mạch điện', '2026-09-03'),
+('YC007', 'PC01', 'T01', 'T05', N'Mượn bù', '2026-09-16');
+
+-- YC005 trong code trước là loại LYC02 (Ngoài khoa), ta thêm chi tiết vào đây
+INSERT INTO tbChiTietYeuCauSuDung_NgoaiKhoa (ID_ChiTiet, YeuCauNo, KhoaPhongBanNo, TenTB, ThongSoKT, LyDo) VALUES
+('CTNK01', 'YC005', 'K02', N'Máy hàn TIG', N'Dòng hàn 200A', N'Mượn máy hàn của Khoa Cơ khí để thi công Robocon');
+
+INSERT INTO tbChiTietYeuCau_Mua (ID_ChiTiet, YeuCauNo, TenTB, SoLuong, ThongSoKT, GiaDuKien, MucDoUuTien, DonViTinh, LyDo) VALUES
+('CTM01', 'YC002', N'Máy tính Dell Vostro', 10, N'Core i5 12th', 15000000, N'Cao', N'Bộ', N'Nâng cấp phòng B201'),
+('CTM02', 'YC002', N'Chuột máy tính', 20, N'Logitech B100', 100000, N'Thấp', N'Cái', N'Thay thế chuột hỏng'),
+('CTM03', 'YC005', N'Màn hình 27 inch', 5, N'Dell Ultrasharp', 8000000, N'Trung bình', N'Cái', N'Dùng cho GV'),
+('CTM04', 'YC005', N'Loa hội trường', 2, N'JBL 1000W', 25000000, N'Thấp', N'Bộ', N'Trang bị hội trường C'),
+('CTM05', 'YC002', N'Dây mạng CAT6', 3, N'Cuộn 300m', 2000000, N'Cao', N'Cái', N'Đi lại dây mạng'),
+('CTM06', 'YC005', N'RAM 16GB', 10, N'DDR4 Bus 3200', 800000, N'Trung bình', N'Cái', N'Nâng cấp RAM'),
+('CTM07', 'YC002', N'Ổ cứng SSD', 10, N'Samsung 500GB', 1200000, N'Cao', N'Cái', N'Thay HDD cũ');
+
+INSERT INTO tbChiTietYeuCau_SuaChua (YeuCauNo, ThietBiNo, HinhAnh, MoTa, LyDo) VALUES
+('YC003', 'PRJ01', 'img/tb003_hong.jpg', N'Bóng đèn mờ, quạt kêu to', N'Hư hỏng linh kiện'),
+('YC006', 'PLC01', 'img/tb005_loi.jpg', N'Không lạnh, chảy nước', N'Lâu ngày không vệ sinh'),
+('YC003', 'PC01', NULL, N'Không lên nguồn', N'Hư nguồn'),
+('YC006', 'CNC01', 'img/cnc_loi.jpg', N'Trục Z bị kẹt', N'Kẹt cơ khí'),
+('YC003', 'PC02', NULL, N'Màn hình xanh', N'Lỗi RAM'),
+('YC006', 'OSC01', NULL, N'Sai số lớn', N'Cần hiệu chuẩn'),
+('YC003', 'HAN01', NULL, N'Pin chai', N'Thay pin mới');
+
+INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBanGiao, NgayNhanThucTe, TrangThaiBanGiao, NguoiBanGiaoNo, NguoiNhanNo, GhiChu) VALUES
+('YC002', 'PC01', 'K01', '2025-09-12', '2025-09-12', N'Đã giao', 'ND006', 'ND002', N'Bàn giao đúng hạn'),
+('YC002', 'PC02', 'K01', '2025-09-12', '2025-09-12', N'Đã giao', 'ND006', 'ND002', NULL),
+('YC006', 'PLC01', 'P01', '2025-09-13', '2025-09-13', N'Đã giao', 'ND006', 'ND006', N'Đã sửa xong'),
+('YC002', 'HAN01', 'K01', '2025-09-14', '2025-09-15', N'Chưa giao', 'ND006', 'ND002', N'Chờ cài win'),
+('YC006', 'CNC01', 'K02', '2025-09-14', '2025-09-14', N'Đã giao', 'ND006', 'ND004', NULL),
+('YC002', 'OSC01', 'K03', '2025-09-15', '2025-09-15', N'Đã giao', 'ND006', 'ND004', NULL),
+('YC002', 'PRJ01', 'K01', '2025-09-12', '2025-09-12', N'Đã giao', 'ND006', 'ND002', NULL);
+GO
