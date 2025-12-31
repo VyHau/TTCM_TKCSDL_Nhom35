@@ -571,3 +571,438 @@ INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBa
 ('YC002', 'OSC01', 'K03', '2025-09-15', '2025-09-15', N'Đã giao', 'ND006', 'ND004', NULL),
 ('YC002', 'PRJ01', 'K01', '2025-09-12', '2025-09-12', N'Đã giao', 'ND006', 'ND002', NULL);
 GO
+
+-- =============================================
+-- Tạo sequence cho các bảng
+-- =============================================
+CREATE SEQUENCE seq_QuyenHan START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_VaiTro START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_ThietBi START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_NguoiDung START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_KhoaPhongBan START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_YeuCau START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_ThongBao START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_TaiLieu START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_DanhMuc START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_NhaCungCap START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_Tiet START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_Phong START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_KhuVuc START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_CoSo START WITH 1 INCREMENT BY 1;
+GO
+
+-- =============================================
+-- PROCEDURES
+-- =============================================
+
+-- Procedure cho sinh mã tự động cho các bảng
+-- Bảng tbQuyenHan
+CREATE PROCEDURE pr_SinhMa_QuyenHan
+    @MaMoi CHAR(5) OUTPUT
+AS
+BEGIN
+    DECLARE @STT INT = NEXT VALUE FOR seq_QuyenHan;
+
+    SET @MaMoi = 'QH' + RIGHT('000' + CAST(@STT AS VARCHAR), 3);
+END;
+GO
+
+-- Bảng tbVaiTro
+CREATE PROCEDURE pr_SinhMa_VaiTro
+    @MaMoi CHAR(5) OUTPUT
+AS
+BEGIN
+    DECLARE @STT INT = NEXT VALUE FOR seq_VaiTro;
+
+    SET @MaMoi = 'VT' + RIGHT('000' + CAST(@STT AS VARCHAR), 3);
+END;
+GO
+
+-- Bảng tbThietBi
+CREATE PROCEDURE pr_SinhMa_ThietBi
+    @MaMoi CHAR(10) OUTPUT
+AS
+BEGIN
+    DECLARE @STT INT = NEXT VALUE FOR seq_ThietBi;
+
+    SET @MaMoi = 'TB' + RIGHT('00000000' + CAST(@STT AS VARCHAR), 8);
+END;
+GO
+
+-- Bảng tbNguoiDung
+CREATE PROCEDURE pr_SinhMa_NguoiDung
+    @MaMoi CHAR(6) OUTPUT
+AS
+BEGIN
+    DECLARE @STT INT = NEXT VALUE FOR seq_NguoiDung;
+
+    SET @MaMoi = 'ND' + RIGHT('0000' + CAST(@STT AS VARCHAR), 4);
+END;
+GO
+
+-- Bảng tbKhoa_PhongBan
+CREATE PROCEDURE pr_SinhMa_KhoaPhongBan
+    @MaMoi CHAR(3) OUTPUT
+AS
+BEGIN
+    DECLARE @STT INT = NEXT VALUE FOR seq_KhoaPhongBan;
+
+    SET @MaMoi = 'KP' + RIGHT('0' + CAST(@STT AS VARCHAR), 1);
+END;
+GO
+
+-- Bảng tbYeuCau
+CREATE PROCEDURE pr_SinhMa_YeuCau
+    @MaMoi CHAR(10) OUTPUT
+AS
+BEGIN
+    DECLARE @STT INT = NEXT VALUE FOR seq_YeuCau;
+
+    SET @MaMoi = 'YC' + RIGHT('00000000' + CAST(@STT AS VARCHAR), 8);
+END;
+GO
+
+-- Bảng tbThongBao
+CREATE PROCEDURE pr_SinhMa_ThongBao
+    @MaMoi CHAR(10) OUTPUT
+AS
+BEGIN
+    DECLARE @STT INT = NEXT VALUE FOR seq_ThongBao;
+
+    SET @MaMoi = 'TB' + RIGHT('00000000' + CAST(@STT AS VARCHAR), 8);
+END;
+GO
+
+-- Bảng tbTaiLieu
+CREATE PROCEDURE pr_SinhMa_TaiLieu
+    @MaMoi CHAR(10) OUTPUT
+AS
+BEGIN
+    DECLARE @STT INT = NEXT VALUE FOR seq_TaiLieu;
+
+    SET @MaMoi = 'TL' + RIGHT('00000000' + CAST(@STT AS VARCHAR), 8);
+END;
+GO
+
+-- Bảng tbDanhMuc
+CREATE PROCEDURE pr_SinhMa_DanhMuc
+    @MaMoi CHAR(10) OUTPUT
+AS
+BEGIN
+    DECLARE @STT INT = NEXT VALUE FOR seq_DanhMuc;
+
+    SET @MaMoi = 'DM' + RIGHT('00000000' + CAST(@STT AS VARCHAR), 8);
+END;
+GO
+
+-- Bảng tbNhaCungCap
+CREATE PROCEDURE pr_SinhMa_NhaCungCap
+    @MaMoi CHAR(10) OUTPUT
+AS
+BEGIN
+    DECLARE @STT INT = NEXT VALUE FOR seq_NhaCungCap;
+
+    SET @MaMoi = 'NCC' + RIGHT('0000000' + CAST(@STT AS VARCHAR), 7);
+END;
+GO
+
+-- Bảng tbTiet
+CREATE PROCEDURE pr_SinhMa_Tiet
+    @MaMoi CHAR(3) OUTPUT
+AS
+BEGIN
+    DECLARE @STT INT = NEXT VALUE FOR seq_Tiet;
+
+    SET @MaMoi = 'T' + RIGHT('00' + CAST(@STT AS VARCHAR), 2);
+END;
+GO
+
+-- Bảng tbPhong
+CREATE PROCEDURE pr_SinhMa_Phong
+    @MaMoi CHAR(4) OUTPUT
+AS
+BEGIN
+    DECLARE @STT INT = NEXT VALUE FOR seq_Phong;
+
+    SET @MaMoi = 'P' + RIGHT('000' + CAST(@STT AS VARCHAR), 3);
+END;
+GO
+
+-- Bảng tbKhuVuc
+CREATE PROCEDURE pr_SinhMa_KhuVuc
+    @MaMoi CHAR(4) OUTPUT
+AS
+BEGIN
+    DECLARE @STT INT = NEXT VALUE FOR seq_KhuVuc;
+
+    SET @MaMoi = 'KV' + RIGHT('00' + CAST(@STT AS VARCHAR), 2);
+END;
+GO
+
+-- Bảng tbCoSo
+CREATE PROCEDURE pr_SinhMa_CoSo
+    @MaMoi CHAR(4) OUTPUT
+AS
+BEGIN
+    DECLARE @STT INT = NEXT VALUE FOR seq_CoSo;
+
+    SET @MaMoi = 'CS' + RIGHT('00' + CAST(@STT AS VARCHAR), 2);
+END;
+GO
+
+-- =============================================
+-- TRIGGER
+-- =============================================
+
+-- Trigger sinh mã tự động cho bảng tbQuyenHan
+CREATE TRIGGER trg_tbQuyenHan_Insert_SinhMa
+ON tbQuyenHan
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(5);
+    EXEC pr_SinhMa_QuyenHan @NewID OUTPUT;
+
+    INSERT INTO tbQuyenHan(ID_QuyenHan, TenQuyenHan)
+    SELECT @NewID, TenQuyenHan
+    FROM inserted;
+END;
+GO
+
+-- Trigger sinh mã tự động cho bảng tbVaiTro
+CREATE TRIGGER trg_tbVaiTro_Insert_SinhMa
+ON tbVaiTro
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(5);
+    EXEC pr_SinhMa_VaiTro @NewID OUTPUT;
+
+    INSERT INTO tbVaiTro(ID_VaiTro, TenVaiTro)
+    SELECT @NewID, TenVaiTro
+    FROM inserted;
+END;
+GO
+
+-- Trigger sinh mã tự động cho bảng tbNguoiDung
+CREATE TRIGGER trg_tbNguoiDung_Insert_SinhMa
+ON tbNguoiDung
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(6);
+    EXEC pr_SinhMa_NguoiDung @NewID OUTPUT;
+
+    INSERT INTO tbNguoiDung(ID_NguoiDung, Email, MatKhau, HoTen, NgaySinh)
+    SELECT @NewID, Email, MatKhau, HoTen, NgaySinh
+    FROM inserted;
+END;
+GO
+
+-- Trigger sinh mã tự động cho bảng tbThietBi
+CREATE TRIGGER trg_tbThietBi_Insert_SinhMa
+ON tbThietBi
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(10);
+    EXEC pr_SinhMa_ThietBi @NewID OUTPUT;
+
+    INSERT INTO tbThietBi(ID_ThietBi, DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri)
+    SELECT @NewID, DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri
+    FROM inserted;
+END;
+GO
+
+-- Trigger sinh mã tự động cho bảng tbKhoa_PhongBan
+CREATE TRIGGER trg_tbKhoaPhongBan_Insert_SinhMa
+ON tbKhoa_PhongBan
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(10);
+    EXEC pr_SinhMa_KhoaPhongBan @NewID OUTPUT;
+
+    INSERT INTO tbKhoa_PhongBan(ID_KhoaPhongBan, TenPhongBanKhoa)
+    SELECT @NewID, TenPhongBanKhoa
+    FROM inserted;
+END;
+GO
+
+-- Trigger sinh mã tự động cho bảng tbTaiLieu
+CREATE TRIGGER trg_tbTaiLieu_Insert_SinhMa
+ON tbTaiLieu
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(10);
+    EXEC pr_SinhMa_TaiLieu @NewID OUTPUT;
+
+    INSERT INTO tbTaiLieu(ID_TaiLieu, DonViQuanLy, TenTaiLieu, SoHieu, NgayPhatHanh, DuongDanFile)
+    SELECT @NewID, DonViQuanLy, TenTaiLieu, SoHieu, NgayPhatHanh, DuongDanFile
+    FROM inserted;
+END;
+GO
+
+-- Trigger sinh mã tự động cho bảng tbYeuCau
+CREATE TRIGGER trg_tbYeuCau_Insert_SinhMa
+ON tbYeuCau
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(10);
+    EXEC pr_SinhMa_YeuCau @NewID OUTPUT;
+
+    INSERT INTO tbYeuCau(ID_YeuCau, NguoiTaoNo, LoaiYeuCauNo, TrangThai, NgayTao, NgayDuKienXL, NgayXuLy)
+    SELECT @NewID, NguoiTaoNo, LoaiYeuCauNo, TrangThai, NgayTao, NgayDuKienXL, NgayXuLy
+    FROM inserted;
+END;
+GO
+
+-- Trigger sinh mã tự động cho bảng tbThongBao
+CREATE TRIGGER trg_tbThongBao_Insert_SinhMa
+ON tbThongBao
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(10);
+    EXEC pr_SinhMa_ThongBao @NewID OUTPUT;
+
+    INSERT INTO tbThongBao(ID_ThongBao, LoaiThongBao, NoiDung, NgayTao)
+    SELECT @NewID, LoaiThongBao, NoiDung, NgayTao
+    FROM inserted;
+END;
+GO
+
+-- Trigger sinh mã tự động cho bảng tbDanhMuc
+CREATE TRIGGER trg_tbDanhMuc_Insert_SinhMa
+ON tbDanhMuc
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(10);
+    EXEC pr_SinhMa_DanhMuc @NewID OUTPUT;
+
+    INSERT INTO tbDanhMuc(ID_DanhMuc, TenDanhMuc)
+    SELECT @NewID, TenDanhMuc
+    FROM inserted;
+END;
+GO
+
+-- Trigger sinh mã tự động cho bảng tbNhaCungCap
+CREATE TRIGGER trg_tbNhaCungCap_Insert_SinhMa
+ON tbNhaCungCap
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(10);
+    EXEC pr_SinhMa_NhaCungCap @NewID OUTPUT;
+
+    INSERT INTO tbNhaCungCap(ID_NhaCC, TenNhaCC, LoaiDichVu, DiaChi, SDT)
+    SELECT @NewID, TenNhaCC, LoaiDichVu, DiaChi, SDT
+    FROM inserted;
+END;
+GO
+
+-- Trigger sinh mã tự động cho bảng tbTiet
+CREATE TRIGGER trg_tbTiet_Insert_SinhMa
+ON tbTiet
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(10);
+    EXEC pr_SinhMa_Tiet @NewID OUTPUT;
+
+    INSERT INTO tbTiet(ID_Tiet, GioBD, ThoiLuong)
+    SELECT @NewID, GioBD, ThoiLuong
+    FROM inserted;
+END;
+GO
+
+-- Trigger sinh mã tự động cho bảng tbPhong
+CREATE TRIGGER trg_tbPhong_Insert_SinhMa
+ON tbPhong
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(10);
+    EXEC pr_SinhMa_Phong @NewID OUTPUT;
+
+    INSERT INTO tbPhong(ID_Phong, TenPhong)
+    SELECT @NewID, TenPhong
+    FROM inserted;
+END;
+GO
+
+-- Trigger sinh mã tự động cho bảng tbKhuVuc
+CREATE TRIGGER trg_tbKhuVuc_Insert_SinhMa
+ON tbKhuVuc
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(10);
+    EXEC pr_SinhMa_KhuVuc @NewID OUTPUT;
+
+    INSERT INTO tbKhuVuc(ID_KhuVuc, TenKhuVuc)
+    SELECT @NewID, TenKhuVuc
+    FROM inserted;
+END;
+GO
+
+-- Trigger sinh mã tự động cho bảng tbCoSo
+CREATE TRIGGER trg_tbCoSo_Insert_SinhMa
+ON tbCoSo
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(10);
+    EXEC pr_SinhMa_CoSo @NewID OUTPUT;
+
+    INSERT INTO tbCoSo(ID_CoSo, TenCoSo)
+    SELECT @NewID, TenCoSo
+    FROM inserted;
+END;
+GO
+
+-- ============================================
+-- Trigger tự động cập nhật ngày tạo và insert tbThongBao_NguoiDung khi thêm thông báo
+CREATE TRIGGER trg_tbThongBao_Insert_ThongBaoNguoiDung
+On tbThongBao
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE tbThongBao
+    SET NgayTao = GETDATE()
+    FROM tbThongBao t
+    INNER JOIN inserted i ON t.ID_ThongBao = i.ID_ThongBao;
+
+    INSERT INTO tbThongBao_NguoiDung(ThongBaoNo, NguoiNhanNo)
+    SELECT i.ID_ThongBao, nd.ID_NguoiDung
+    FROM inserted i
+    CROSS JOIN tbNguoiDung nd
+    WHERE i.LoaiThongBao = N'Công khai';
+END;
+GO
+
+-- Trigger chặn xóa thiết bị, thay trạng thái thành 'Đã thanh lý'
+CREATE TRIGGER trg_tbThietBi_Delete_ThanhLy
+ON tbThietBi
+INSTEAD OF DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE tbThietBi
+    SET TrangThaiThietBi = N'Đã thanh lý'
+    FROM tbThietBi t
+    INNER JOIN deleted d
+        ON t.ID_ThietBi = d.ID_ThietBi;
+END;
+GO
+
+-- =============================================
+-- MOCK DATA
+-- =============================================
+
