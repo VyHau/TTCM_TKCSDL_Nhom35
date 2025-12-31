@@ -325,7 +325,7 @@ CREATE TABLE tbChiTietYeuCau_BanGiao (
     ThietBiNo CHAR(10),
     PhongBanKhoaNo CHAR(3),
     NgayBanGiao DATE NOT NULL,
-    NgayNhanThucTe DATE NOT NULL,
+    NgayNhanThucTe DATE NULL,
     TrangThaiBanGiao NVARCHAR(15) DEFAULT N'Chưa giao',
     NguoiBanGiaoNo CHAR(6),
     NguoiNhanNo CHAR(6),
@@ -780,3 +780,32 @@ GO
 -- =============================================
 -- MOCK DATA
 -- =============================================
+
+-- Trigger cập nhật thông tin khi bàn giao
+CREATE TRIGGER trg_ChiTietBanGiao_DaBanGiao
+ON tbChiTietYeuCau_BanGiao
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF UPDATE(TrangThaiBanGiao)
+    BEGIN
+        UPDATE tbThietBi
+        SET KhoaPhongBan = i.PhongBanKhoaNo, TrangThaiThietBi = N'Đang sử dụng'
+        FROM tbThietBi tb 
+        INNER JOIN inserted i ON tb.ID_ThietBi = i.ThietBiNo
+        INNER JOIN deleted d ON i.YeuCauNo = d.YeuCauNo AND i.ThietBiNo = d.ThietBiNo
+        WHERE i.TrangThaiBanGiao = N'Đã bàn giao'
+
+        -- Cập nhật ngày nhận thực tế
+        UPDATE tbChiTietYeuCau_BanGiao
+        SET NgayNhanThucTe = GETDATE()
+        FROM tbChiTietYeuCau_BanGiao ct
+        INNER JOIN inserted i ON ct.YeuCauNo = i.YeuCauNo AND ct.ThietBiNo = i.ThietBiNo
+        INNER JOIN deleted d ON ct.YeuCauNo = d.YeuCauNo AND ct.ThietBiNo = d.ThietBiNo
+        WHERE i.TrangThaiBanGiao = N'Đã bàn giao'
+    END
+END;
+GO
+
