@@ -325,7 +325,7 @@ CREATE TABLE tbChiTietYeuCau_BanGiao (
     ThietBiNo CHAR(10),
     PhongBanKhoaNo CHAR(3),
     NgayBanGiao DATE NOT NULL,
-    NgayNhanThucTe DATE NOT NULL,
+    NgayNhanThucTe DATE NULL,
     TrangThaiBanGiao NVARCHAR(15) DEFAULT N'Chưa giao',
     NguoiBanGiaoNo CHAR(6),
     NguoiNhanNo CHAR(6),
@@ -1006,3 +1006,128 @@ GO
 -- MOCK DATA
 -- =============================================
 
+-- Trigger cập nhật thông tin khi bàn giao
+CREATE TRIGGER trg_ChiTietBanGiao_DaBanGiao
+ON tbChiTietYeuCau_BanGiao
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF UPDATE(TrangThaiBanGiao)
+    BEGIN
+        UPDATE tbThietBi
+        SET KhoaPhongBan = i.PhongBanKhoaNo, TrangThaiThietBi = N'Đang sử dụng'
+        FROM tbThietBi tb 
+        INNER JOIN inserted i ON tb.ID_ThietBi = i.ThietBiNo
+        INNER JOIN deleted d ON i.YeuCauNo = d.YeuCauNo AND i.ThietBiNo = d.ThietBiNo
+        WHERE i.TrangThaiBanGiao = N'Đã bàn giao'
+
+        -- Cập nhật ngày nhận thực tế
+        UPDATE tbChiTietYeuCau_BanGiao
+        SET NgayNhanThucTe = GETDATE()
+        FROM tbChiTietYeuCau_BanGiao ct
+        INNER JOIN inserted i ON ct.YeuCauNo = i.YeuCauNo AND ct.ThietBiNo = i.ThietBiNo
+        INNER JOIN deleted d ON ct.YeuCauNo = d.YeuCauNo AND ct.ThietBiNo = d.ThietBiNo
+        WHERE i.TrangThaiBanGiao = N'Đã bàn giao'
+    END
+END;
+GO
+
+-- Trigger khi update tbYeuCau (trạng thái) => cập nhật trạng thái thiết bị
+CREATE TRIGGER trg_tbYeuCau_CapNhatTrangThaiTB
+ON tbYeuCau
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- 1. Khi tạo yêu cầu sửa chữa
+    UPDATE tbThietBi
+    SET TrangThaiThietBi = N'Hư hỏng'
+    FROM tbThietBi tb
+    JOIN tbChiTietYeuCau_SuaChua ct ON tb.ID_ThietBi = ct.ThietBiNo
+    JOIN inserted i ON ct.YeuCauNo = i.ID_YeuCau
+    WHERE i.LoaiYeuCauNo = 'LYC03' AND i.TrangThai = N'Chờ xử lý';
+
+    -- 2. Khi duyệt yêu cầu sửa chữa
+    UPDATE tbThietBi
+    SET TrangThaiThietBi = N'Sửa chữa'
+    FROM tbThietBi tb
+    JOIN tbChiTietYeuCau_SuaChua ct ON tb.ID_ThietBi = ct.ThietBiNo
+    JOIN inserted i ON ct.YeuCauNo = i.ID_YeuCau
+    JOIN deleted d ON i.ID_YeuCau = d.ID_YeuCau
+    WHERE i.LoaiYeuCauNo = 'LYC03' AND d.TrangThai = N'Chờ xử lý' AND i.TrangThai = N'Đã duyệt';
+
+    -- 3. Khi hoàn thành yêu cầu sửa chữa
+    UPDATE tbThietBi
+    SET TrangThaiThietBi = N'Sẵn sàng'
+    FROM tbThietBi tb
+    JOIN tbChiTietYeuCau_SuaChua ct ON tb.ID_ThietBi = ct.ThietBiNo
+    JOIN inserted i ON ct.YeuCauNo = i.ID_YeuCau
+    WHERE i.LoaiYeuCauNo = 'LYC03' AND i.TrangThai = N'Hoàn Thành';
+END;
+GO
+
+-- Trigger tạo thông báo tự động khi cập nhật trạng thái yêu cầu
+CREATE TRIGGER trg_YeuCau_ThongBaoHeThong
+ON tbYeuCau
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO tbThongBao (ID_ThongBao, NguoiTaoNo, TieuDe, NoiDung, NgayTao, LoaiThongBao)
+    SELECT 
+        NEXT VALUE FOR seq_ThongBao,
+        NULL,
+        N'Thông báo xử lý yêu cầu',
+        CASE 
+            WHEN i.TrangThai = N'Đã duyệt' 
+                THEN N'Yêu cầu ' + lyc.TenLoaiYeuCau + N' đã được duyệt'
+            ELSE 
+                N'Yêu cầu ' + lyc.TenLoaiYeuCau + N' đã bị từ chối'
+        END,
+        GETDATE(),
+        N'Hệ thống'
+    FROM inserted i
+    INNER JOIN deleted d ON i.ID_YeuCau = d.ID_YeuCau
+    INNER JOIN tbLoaiYeuCau lyc ON i.LoaiYeuCauNo = lyc.ID_LoaiYeuCau
+    WHERE d.TrangThai = N'Chờ xử lý' AND i.TrangThai IN (N'Đã duyệt', N'Từ chối');
+
+    INSERT INTO tbThongBao_NguoiDung (ThongBaoNo, NguoiNhanNo)
+    SELECT tb.ID_ThongBao, i.NguoiTaoNo
+    FROM tbThongBao tb
+    INNER JOIN inserted i ON tb.NgayTao = CAST(GETDATE() AS DATE)
+    WHERE i.NguoiTaoNo IS NOT NULL;
+END;
+GO
+
+-- Trigger kiểm tra trùng lịch mượn khi INSERT vào tbChiTietYeuCau_SuDung
+CREATE TRIGGER trg_ChiTietSuDung_Insert_KiemTraTrung
+ON tbChiTietYeuCau_SuDung
+INSTEAD OF INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Kiểm tra trùng: cùng thiết bị, cùng ngày, có tiết giao nhau
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        INNER JOIN tbChiTietYeuCau_SuDung ct ON i.ThietBiNo = ct.ThietBiNo AND i.NgayMuon = ct.NgayMuon
+        INNER JOIN tbYeuCau yc ON ct.YeuCauNo = yc.ID_YeuCau
+        WHERE yc.TrangThai NOT IN (N'Từ chối', N'Đã hủy', N'Hoàn Thành') AND ((i.TietBDNo <= ct.TietKTNo) AND (i.TietKTNo >= ct.TietBDNo))
+    )
+    BEGIN
+        RAISERROR(N'Thiết bị đã được mượn trong khoảng thời gian này. Vui lòng chọn thời gian khác.', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Nếu không trùng thì cho phép insert
+    INSERT INTO tbChiTietYeuCau_SuDung (YeuCauNo, ThietBiNo, TietBDNo, TietKTNo, LyDoMuon, NgayMuon)
+    SELECT YeuCauNo, ThietBiNo, TietBDNo, TietKTNo, LyDoMuon, NgayMuon
+    FROM inserted;
+END;
+GO
