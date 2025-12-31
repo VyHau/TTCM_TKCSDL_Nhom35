@@ -843,3 +843,37 @@ BEGIN
     WHERE i.LoaiYeuCauNo = 'LYC03' AND i.TrangThai = N'Hoàn Thành';
 END;
 GO
+
+-- Trigger tạo thông báo tự động khi cập nhật trạng thái yêu cầu
+CREATE TRIGGER trg_YeuCau_ThongBaoHeThong
+ON tbYeuCau
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO tbThongBao (ID_ThongBao, NguoiTaoNo, TieuDe, NoiDung, NgayTao, LoaiThongBao)
+    SELECT 
+        NEXT VALUE FOR seq_ThongBao,
+        NULL,
+        N'Thông báo xử lý yêu cầu',
+        CASE 
+            WHEN i.TrangThai = N'Đã duyệt' 
+                THEN N'Yêu cầu ' + lyc.TenLoaiYeuCau + N' đã được duyệt'
+            ELSE 
+                N'Yêu cầu ' + lyc.TenLoaiYeuCau + N' đã bị từ chối'
+        END,
+        GETDATE(),
+        N'Hệ thống'
+    FROM inserted i
+    INNER JOIN deleted d ON i.ID_YeuCau = d.ID_YeuCau
+    INNER JOIN tbLoaiYeuCau lyc ON i.LoaiYeuCauNo = lyc.ID_LoaiYeuCau
+    WHERE d.TrangThai = N'Chờ xử lý' AND i.TrangThai IN (N'Đã duyệt', N'Từ chối');
+
+    INSERT INTO tbThongBao_NguoiDung (ThongBaoNo, NguoiNhanNo)
+    SELECT tb.ID_ThongBao, i.NguoiTaoNo
+    FROM tbThongBao tb
+    INNER JOIN inserted i ON tb.NgayTao = CAST(GETDATE() AS DATE)
+    WHERE i.NguoiTaoNo IS NOT NULL;
+END;
+GO
