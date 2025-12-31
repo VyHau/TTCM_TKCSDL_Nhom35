@@ -877,3 +877,32 @@ BEGIN
     WHERE i.NguoiTaoNo IS NOT NULL;
 END;
 GO
+
+-- Trigger kiểm tra trùng lịch mượn khi INSERT vào tbChiTietYeuCau_SuDung
+CREATE TRIGGER trg_ChiTietSuDung_Insert_KiemTraTrung
+ON tbChiTietYeuCau_SuDung
+INSTEAD OF INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Kiểm tra trùng: cùng thiết bị, cùng ngày, có tiết giao nhau
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        INNER JOIN tbChiTietYeuCau_SuDung ct ON i.ThietBiNo = ct.ThietBiNo AND i.NgayMuon = ct.NgayMuon
+        INNER JOIN tbYeuCau yc ON ct.YeuCauNo = yc.ID_YeuCau
+        WHERE yc.TrangThai NOT IN (N'Từ chối', N'Đã hủy', N'Hoàn Thành') AND ((i.TietBDNo <= ct.TietKTNo) AND (i.TietKTNo >= ct.TietBDNo))
+    )
+    BEGIN
+        RAISERROR(N'Thiết bị đã được mượn trong khoảng thời gian này. Vui lòng chọn thời gian khác.', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- Nếu không trùng thì cho phép insert
+    INSERT INTO tbChiTietYeuCau_SuDung (YeuCauNo, ThietBiNo, TietBDNo, TietKTNo, LyDoMuon, NgayMuon)
+    SELECT YeuCauNo, ThietBiNo, TietBDNo, TietKTNo, LyDoMuon, NgayMuon
+    FROM inserted;
+END;
+GO
