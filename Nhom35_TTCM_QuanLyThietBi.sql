@@ -809,3 +809,37 @@ BEGIN
 END;
 GO
 
+-- Trigger khi update tbYeuCau (trạng thái) => cập nhật trạng thái thiết bị
+CREATE TRIGGER trg_tbYeuCau_CapNhatTrangThaiTB
+ON tbYeuCau
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- 1. Khi tạo yêu cầu sửa chữa
+    UPDATE tbThietBi
+    SET TrangThaiThietBi = N'Hư hỏng'
+    FROM tbThietBi tb
+    JOIN tbChiTietYeuCau_SuaChua ct ON tb.ID_ThietBi = ct.ThietBiNo
+    JOIN inserted i ON ct.YeuCauNo = i.ID_YeuCau
+    WHERE i.LoaiYeuCauNo = 'LYC03' AND i.TrangThai = N'Chờ xử lý';
+
+    -- 2. Khi duyệt yêu cầu sửa chữa
+    UPDATE tbThietBi
+    SET TrangThaiThietBi = N'Sửa chữa'
+    FROM tbThietBi tb
+    JOIN tbChiTietYeuCau_SuaChua ct ON tb.ID_ThietBi = ct.ThietBiNo
+    JOIN inserted i ON ct.YeuCauNo = i.ID_YeuCau
+    JOIN deleted d ON i.ID_YeuCau = d.ID_YeuCau
+    WHERE i.LoaiYeuCauNo = 'LYC03' AND d.TrangThai = N'Chờ xử lý' AND i.TrangThai = N'Đã duyệt';
+
+    -- 3. Khi hoàn thành yêu cầu sửa chữa
+    UPDATE tbThietBi
+    SET TrangThaiThietBi = N'Sẵn sàng'
+    FROM tbThietBi tb
+    JOIN tbChiTietYeuCau_SuaChua ct ON tb.ID_ThietBi = ct.ThietBiNo
+    JOIN inserted i ON ct.YeuCauNo = i.ID_YeuCau
+    WHERE i.LoaiYeuCauNo = 'LYC03' AND i.TrangThai = N'Hoàn Thành';
+END;
+GO
