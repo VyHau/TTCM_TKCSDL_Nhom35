@@ -792,19 +792,24 @@ BEGIN
     IF UPDATE(TrangThaiBanGiao)
     BEGIN
         UPDATE tbThietBi
-        SET KhoaPhongBan = i.PhongBanKhoaNo, TrangThaiThietBi = N'Đang sử dụng'
+        SET KhoaPhongBan = i.PhongBanKhoaNo
         FROM tbThietBi tb 
         INNER JOIN inserted i ON tb.ID_ThietBi = i.ThietBiNo
         INNER JOIN deleted d ON i.YeuCauNo = d.YeuCauNo AND i.ThietBiNo = d.ThietBiNo
-        WHERE i.TrangThaiBanGiao = N'Đã bàn giao'
+        WHERE i.TrangThaiBanGiao = N'Đã giao'
 
         -- Cập nhật ngày nhận thực tế
         UPDATE tbChiTietYeuCau_BanGiao
-        SET NgayNhanThucTe = GETDATE()
+        SET NgayNhanThucTe = GETDATE(),
+            GhiChu = CASE 
+                        WHEN GETDATE() > i.NgayBanGiao 
+                        THEN N'Bàn giao không đúng thời hạn'
+                        ELSE N'Bàn giao đúng thời hạn'
+                    END
         FROM tbChiTietYeuCau_BanGiao ct
         INNER JOIN inserted i ON ct.YeuCauNo = i.YeuCauNo AND ct.ThietBiNo = i.ThietBiNo
         INNER JOIN deleted d ON ct.YeuCauNo = d.YeuCauNo AND ct.ThietBiNo = d.ThietBiNo
-        WHERE i.TrangThaiBanGiao = N'Đã bàn giao'
+        WHERE i.TrangThaiBanGiao = N'Đã giao'
     END
 END;
 GO
