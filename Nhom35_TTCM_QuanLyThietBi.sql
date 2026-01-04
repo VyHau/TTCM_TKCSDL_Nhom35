@@ -1017,19 +1017,24 @@ BEGIN
     IF UPDATE(TrangThaiBanGiao)
     BEGIN
         UPDATE tbThietBi
-        SET KhoaPhongBan = i.PhongBanKhoaNo, TrangThaiThietBi = N'Đang sử dụng'
+        SET KhoaPhongBan = i.PhongBanKhoaNo
         FROM tbThietBi tb 
         INNER JOIN inserted i ON tb.ID_ThietBi = i.ThietBiNo
         INNER JOIN deleted d ON i.YeuCauNo = d.YeuCauNo AND i.ThietBiNo = d.ThietBiNo
-        WHERE i.TrangThaiBanGiao = N'Đã bàn giao'
+        WHERE i.TrangThaiBanGiao = N'Đã giao'
 
         -- Cập nhật ngày nhận thực tế
         UPDATE tbChiTietYeuCau_BanGiao
-        SET NgayNhanThucTe = GETDATE()
+        SET NgayNhanThucTe = GETDATE(),
+            GhiChu = CASE 
+                        WHEN GETDATE() > i.NgayBanGiao 
+                        THEN N'Bàn giao không đúng thời hạn'
+                        ELSE N'Bàn giao đúng thời hạn'
+                    END
         FROM tbChiTietYeuCau_BanGiao ct
         INNER JOIN inserted i ON ct.YeuCauNo = i.YeuCauNo AND ct.ThietBiNo = i.ThietBiNo
         INNER JOIN deleted d ON ct.YeuCauNo = d.YeuCauNo AND ct.ThietBiNo = d.ThietBiNo
-        WHERE i.TrangThaiBanGiao = N'Đã bàn giao'
+        WHERE i.TrangThaiBanGiao = N'Đã giao'
     END
 END;
 GO
@@ -1078,31 +1083,36 @@ BEGIN
     SET NOCOUNT ON;
 
     INSERT INTO tbThongBao (ID_ThongBao, NguoiTaoNo, TieuDe, NoiDung, NgayTao, LoaiThongBao)
-    SELECT 
+    SELECT
         NEXT VALUE FOR seq_ThongBao,
         NULL,
         N'Thông báo xử lý yêu cầu',
-        CASE 
-            WHEN i.TrangThai = N'Đã duyệt' 
-                THEN N'Yêu cầu ' + lyc.TenLoaiYeuCau + N' đã được duyệt'
-            ELSE 
-                N'Yêu cầu ' + lyc.TenLoaiYeuCau + N' đã bị từ chối'
+        CASE
+            WHEN i.TrangThai = N'Đã duyệt' THEN lyc.TenLoaiYeuCau + i.ID_YeuCau + N' đã được duyệt'
+            WHEN i.TrangThai = N'Từ chối' THEN lyc.TenLoaiYeuCau + i.ID_YeuCau + N' đã bị từ chối'
+            WHEN i.TrangThai = N'Hoàn Thành' THEN lyc.TenLoaiYeuCau + i.ID_YeuCau + N' đã hoàn thành'
+            ELSE N'Yêu cầu ' + i.ID_YeuCau + N' trạng thái thay đổi'
         END,
         GETDATE(),
         N'Hệ thống'
     FROM inserted i
     INNER JOIN deleted d ON i.ID_YeuCau = d.ID_YeuCau
     INNER JOIN tbLoaiYeuCau lyc ON i.LoaiYeuCauNo = lyc.ID_LoaiYeuCau
-    WHERE d.TrangThai = N'Chờ xử lý' AND i.TrangThai IN (N'Đã duyệt', N'Từ chối');
+    WHERE d.TrangThai IN (N'Chờ xử lý', N'Đã duyệt') AND i.TrangThai IN (N'Đã duyệt', N'Từ chối', N'Hoàn Thành');
 
-    INSERT INTO tbThongBao_NguoiDung (ThongBaoNo, NguoiNhanNo)
-    SELECT tb.ID_ThongBao, i.NguoiTaoNo
-    FROM tbThongBao tb
-    INNER JOIN inserted i ON tb.NgayTao = CAST(GETDATE() AS DATE)
+    INSERT INTO tbThongBao_NguoiDung (ThongBaoNo, NguoiNhanNo, TrangThaiDoc)
+    SELECT TOP 1 tb.ID_ThongBao, i.NguoiTaoNo, 0
+    FROM inserted i
+    CROSS APPLY (
+        SELECT TOP 1 ID_ThongBao
+        FROM tbThongBao
+        WHERE NoiDung LIKE '%' + i.ID_YeuCau + '%' AND LoaiThongBao = N'Hệ thống'
+        ORDER BY ID_ThongBao DESC
+    ) tb
     WHERE i.NguoiTaoNo IS NOT NULL;
-END;
+END
 GO
-
+    
 -- Trigger kiểm tra trùng lịch mượn khi INSERT vào tbChiTietYeuCau_SuDung
 CREATE TRIGGER trg_ChiTietSuDung_Insert_KiemTraTrung
 ON tbChiTietYeuCau_SuDung
