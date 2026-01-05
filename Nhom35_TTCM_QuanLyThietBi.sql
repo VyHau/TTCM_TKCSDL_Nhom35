@@ -506,13 +506,13 @@ INSERT INTO tbThietBi (ID_ThietBi, DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, Tran
 GO
 
 INSERT INTO tbPhong_ThietBi (ThietBiNo, PhongNo, NgayHieuLuc) VALUES
-('PC01', 'B201', '2026-01-01'),
-('PC02', 'B201', '2026-01-01'),
+('PC01', 'B201', '2026-05-01'),
+('PC02', 'B201', '2026-04-10'),
 ('PRJ01', 'A101', '2026-05-15'),
-('CNC01', 'D001', '2026-01-01'),
+('CNC01', 'D001', '2026-03-01'),
 ('HAN01', 'D001', '2026-06-20'),
 ('PC01', 'B202', '2026-02-01'), 
-('OSC01', 'E101', '2026-01-10');
+('OSC01', 'E101', '2026-07-10');
 
 INSERT INTO tbThietBi_NguoiDung (ThietBiNo, NguoiDungNo, TrangThai) VALUES
 ('PC02', 'ND002', 1), -- Trưởng khoa dùng Workstation
@@ -868,8 +868,8 @@ BEGIN
     DECLARE @NewID CHAR(10);
     EXEC pr_SinhMa_ThongBao @NewID OUTPUT;
 
-    INSERT INTO tbThongBao(ID_ThongBao, LoaiThongBao, NoiDung, NgayTao)
-    SELECT @NewID, LoaiThongBao, NoiDung, NgayTao
+    INSERT INTO tbThongBao(ID_ThongBao, TieuDe, LoaiThongBao, NoiDung, NgayTao)
+    SELECT @NewID, TieuDe, LoaiThongBao, NoiDung, NgayTao
     FROM inserted;
 END;
 GO
