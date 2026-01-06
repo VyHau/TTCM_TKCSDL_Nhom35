@@ -185,7 +185,7 @@ CREATE TABLE tbThietBi (
     NhaCCNo CHAR(10),
     KhoaPhongBan CHAR(3) NULL,
     TenTB NVARCHAR(100) NOT NULL,
-    TrangThaiThietBi NVARCHAR(20) DEFAULT N'Sẵn sàng' CHECK (TrangThaiThietBi IN (N'Sửa chữa', N'Thanh lý', N'Đang sử dụng', N'Hư hỏng', N'Sẵn sàng')),
+    TrangThaiThietBi NVARCHAR(20) DEFAULT N'Sẵn sàng' CHECK (TrangThaiThietBi IN (N'Sửa chữa', N'Đã thanh lý', N'Đang sử dụng', N'Hư hỏng', N'Sẵn sàng')),
     Gia DECIMAL(12, 2) CHECK (Gia >= 0) NOT NULL,
     ThongSoKT NVARCHAR(100) NOT NULL,
     SoSeri VARCHAR(20) NOT NULL UNIQUE,
@@ -972,11 +972,6 @@ AFTER INSERT
 AS
 BEGIN
     SET NOCOUNT ON;
-
-    UPDATE tbThongBao
-    SET NgayTao = GETDATE()
-    FROM tbThongBao t
-    INNER JOIN inserted i ON t.ID_ThongBao = i.ID_ThongBao;
 
     INSERT INTO tbThongBao_NguoiDung(ThongBaoNo, NguoiNhanNo)
     SELECT i.ID_ThongBao, nd.ID_NguoiDung
