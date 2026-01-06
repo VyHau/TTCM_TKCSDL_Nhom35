@@ -185,7 +185,7 @@ CREATE TABLE tbThietBi (
     NhaCCNo CHAR(10),
     KhoaPhongBan CHAR(3) NULL,
     TenTB NVARCHAR(100) NOT NULL,
-    TrangThaiThietBi NVARCHAR(20) DEFAULT N'Sẵn sàng' CHECK (TrangThaiThietBi IN (N'Sửa chữa', N'Đã thanh lý', N'Đang sử dụng', N'Hư hỏng', N'Sẵn sàng')),
+    TrangThaiThietBi NVARCHAR(20) DEFAULT N'Sẵn sàng' CHECK (TrangThaiThietBi IN (N'Sửa chữa', N'Đã thanh lý', N'Đang sử dụng', N'Hư hỏng', N'Sẵn sàng', N'Đang bàn giao')),
     Gia DECIMAL(12, 2) CHECK (Gia >= 0) NOT NULL,
     ThongSoKT NVARCHAR(100) NOT NULL,
     SoSeri VARCHAR(20) NOT NULL UNIQUE,
@@ -867,12 +867,11 @@ BEGIN
 
     IF UPDATE(TrangThaiBanGiao)
     BEGIN
-        UPDATE tbThietBi
-        SET KhoaPhongBan = i.PhongBanKhoaNo
+        UPDATE tb
+        SET tb.TrangThaiThietBi = N'Sẵn sàng'
         FROM tbThietBi tb 
         INNER JOIN inserted i ON tb.ID_ThietBi = i.ThietBiNo
-        INNER JOIN deleted d ON i.YeuCauNo = d.YeuCauNo AND i.ThietBiNo = d.ThietBiNo
-        WHERE i.TrangThaiBanGiao = N'Đã giao'
+        WHERE i.TrangThaiBanGiao = N'Đã giao';
 
         -- Cập nhật ngày nhận thực tế
         UPDATE tbChiTietYeuCau_BanGiao
@@ -886,6 +885,9 @@ BEGIN
         INNER JOIN inserted i ON ct.YeuCauNo = i.YeuCauNo AND ct.ThietBiNo = i.ThietBiNo
         INNER JOIN deleted d ON ct.YeuCauNo = d.YeuCauNo AND ct.ThietBiNo = d.ThietBiNo
         WHERE i.TrangThaiBanGiao = N'Đã giao'
+
+        DECLARE @KQ NVARCHAR(100) = (SELECT CASE WHEN GETDATE() > NgayBanGiao THEN N'Bàn giao trễ thời hạn!' ELSE N'Bàn giao đúng thời hạn!' END FROM inserted);
+        PRINT @KQ;
     END
 END;
 GO
@@ -933,9 +935,8 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    INSERT INTO tbThongBao (ID_ThongBao, NguoiTaoNo, TieuDe, NoiDung, NgayTao, LoaiThongBao)
+    INSERT INTO tbThongBao (NguoiTaoNo, TieuDe, NoiDung, NgayTao, LoaiThongBao)
     SELECT
-        NEXT VALUE FOR seq_ThongBao,
         NULL,
         N'Thông báo xử lý yêu cầu',
         CASE
@@ -1203,11 +1204,11 @@ INSERT INTO tbLopHocPhan (ID_LHP, PhongNo, TietNo, Thu, SiSo, TenLHP, HocKy) VAL
 -- tbThietBi (TB00000001 -> TB00000007) - Trigger tự sinh mã
 INSERT INTO tbThietBi (DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri) VALUES ('DM00000001', 'NCC0000001', 'KP1', N'PC Dell Optiplex 7090', N'Sẵn sàng', 15000000, N'Core i7-12700, RAM 16GB, SSD 512GB', 'SN-DELL-001');
 INSERT INTO tbThietBi (DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri) VALUES ('DM00000001', 'NCC0000001', 'KP1', N'Workstation HP Z4', N'Đang sử dụng', 45000000, N'Xeon W-2223, RAM 32GB, Quadro P2200', 'SN-HP-WORK-01');
-INSERT INTO tbThietBi (DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri) VALUES ('DM00000002', 'NCC0000002', 'KP1', N'Máy chiếu Panasonic PT-LB', N'Sẵn sàng', 18000000, N'4100 Ansi Lumens, XGA, HDMI', 'SN-PANA-99');
+INSERT INTO tbThietBi (DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri) VALUES ('DM00000002', 'NCC0000002', 'KP1', N'Máy chiếu Panasonic PT-LB', N'Đang bàn giao', 18000000, N'4100 Ansi Lumens, XGA, HDMI', 'SN-PANA-99');
 INSERT INTO tbThietBi (DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri) VALUES ('DM00000005', 'NCC0000004', 'KP2', N'Máy phay CNC Mini', N'Sửa chữa', 120000000, N'Hành trình 300x400mm, Trục chính 24000rpm', 'SN-CNC-X1');
 INSERT INTO tbThietBi (DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri) VALUES ('DM00000005', 'NCC0000004', 'KP2', N'Máy hàn TIG Jasic', N'Sẵn sàng', 8500000, N'200A, Hàn inox/sắt', 'SN-HAN-JS01');
 INSERT INTO tbThietBi (DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri) VALUES ('DM00000004', 'NCC0000001', 'KP3', N'Dao động ký Tektronix', N'Sẵn sàng', 12500000, N'100MHz, 2 Kênh, Digital Storage', 'SN-TEK-105');
-INSERT INTO tbThietBi (DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri) VALUES ('DM00000006', 'NCC0000001', 'KP3', N'Bộ thực hành PLC Mitsubishi', N'Hư hỏng', 2500000, N'FX3U, Kèm module Analog', 'SN-PLC-O1');
+INSERT INTO tbThietBi (DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri) VALUES ('DM00000006', 'NCC0000001', 'KP3', N'Bộ thực hành PLC Mitsubishi', N'Đang bàn giao', 2500000, N'FX3U, Kèm module Analog', 'SN-PLC-O1');
 GO
 
 -- tbPhong_ThietBi (không có trigger)
