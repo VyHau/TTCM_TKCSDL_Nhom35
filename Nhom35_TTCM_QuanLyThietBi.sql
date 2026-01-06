@@ -634,7 +634,7 @@ BEGIN
     DECLARE @NewID CHAR(10);
     EXEC pr_SinhMa_KhoaPhongBan @NewID OUTPUT;
 
-    INSERT INTO tbKhoaPhongBan(ID_KhoaPhongBan, TenKhoaPhongBan)
+    INSERT INTO tbKhoa_PhongBan(ID_KhoaPhongBan, TenPhongBanKhoa)
     SELECT @NewID, TenPhongBanKhoa
     FROM inserted;
 END;
@@ -651,6 +651,21 @@ BEGIN
 
     INSERT INTO tbTaiLieu(ID_TaiLieu, DonViQuanLy, TenTaiLieu, SoHieu, NgayPhatHanh, DuongDanFile, TrangThaiApDung)
     SELECT @NewID, DonViQuanLy, TenTaiLieu, SoHieu, NgayPhatHanh, DuongDanFile, TrangThaiApDung
+    FROM inserted;
+END;
+GO
+
+-- Trigger sinh mã tự động cho bảng tbLoaiYeuCau
+CREATE TRIGGER trg_tbLoaiYeuCau_Insert_SinhMa
+ON tbLoaiYeuCau
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(10);
+    EXEC pr_SinhMa_LoaiYeuCau @NewID OUTPUT;
+
+    INSERT INTO tbLoaiYeuCau(ID_LoaiYeuCau, TenLoaiYeuCau)
+    SELECT @NewID, TenLoaiYeuCau
     FROM inserted;
 END;
 GO
@@ -709,7 +724,7 @@ BEGIN
     DECLARE @NewID CHAR(10);
     EXEC pr_SinhMa_NhaCungCap @NewID OUTPUT;
 
-    INSERT INTO tbNhaCC(ID_NhaCC, TenNhaCC, LoaiDichVu, DiaChi, SDT)
+    INSERT INTO tbNhaCungCap(ID_NhaCC, TenNhaCC, LoaiDichVu, DiaChi, SDT)
     SELECT @NewID, TenNhaCC, LoaiDichVu, DiaChi, SDT
     FROM inserted;
 END;
@@ -771,6 +786,36 @@ BEGIN
 
     INSERT INTO tbCoSo(ID_CoSo, TenCoSo)
     SELECT @NewID, TenCoSo
+    FROM inserted;
+END;
+GO
+
+-- Trigger sinh mã tự động cho bảng tbChiTietYeuCau_Mua
+CREATE TRIGGER trg_tbChiTietMua_Insert_SinhMa
+ON tbChiTietYeuCau_Mua
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(10);
+    EXEC pr_SinhMa_ChiTietYeuCau_Mua @NewID OUTPUT;
+
+    INSERT INTO tbChiTietYeuCau_Mua(ID_ChiTiet, YeuCauNo, TenTB, SoLuong, ThongSoKT, GiaDuKien, MucDoUuTien, DonViTinh, LyDo)
+    SELECT @NewID, YeuCauNo, TenTB, SoLuong, ThongSoKT, GiaDuKien, MucDoUuTien, DonViTinh, LyDo
+    FROM inserted;
+END;
+GO
+
+-- Trigger sinh mã tự động cho bảng tbChiTietYeuCauSuDung_NgoaiKhoa
+CREATE TRIGGER trg_tbChiTietNgoaiKhoa_Insert_SinhMa
+ON tbChiTietYeuCauSuDung_NgoaiKhoa
+INSTEAD OF INSERT
+AS
+BEGIN
+    DECLARE @NewID CHAR(10);
+    EXEC pr_SinhMa_ChiTietYeuCau_SuDung_NgoaiKhoa @NewID OUTPUT;
+
+    INSERT INTO tbChiTietYeuCauSuDung_NgoaiKhoa(ID_ChiTiet, YeuCauNo, KhoaPhongBanNo, TenTB, ThongSoKT, LyDo)
+    SELECT @NewID, YeuCauNo, KhoaPhongBanNo, TenTB, ThongSoKT, LyDo
     FROM inserted;
 END;
 GO
@@ -1152,36 +1197,33 @@ INSERT INTO tbChiTietYeuCau_SuDung (YeuCauNo, ThietBiNo, TietBDNo, TietKTNo, LyD
 ('YC00000007', 'TB00000001', 'T01', 'T05', N'Mượn bù buổi học trước', '2026-09-16');
 
 -- CHI TIẾT YÊU CẦU SỬ DỤNG NGOÀI KHOA
-INSERT INTO tbChiTietYeuCauSuDung_NgoaiKhoa (ID_ChiTiet, YeuCauNo, KhoaPhongBanNo, TenTB, ThongSoKT, LyDo) VALUES
-('CTNK000001', 'YC00000002', 'KP2', N'Máy hàn TIG Jasic', N'Dòng hàn 200A, Hàn inox/sắt', N'Mượn máy hàn của Khoa Cơ khí để thi công Robocon'),
-('CTNK000002', 'YC00000002', 'KP2', N'Máy phay CNC Mini', N'Hành trình 300x400mm', N'Mượn gia công chi tiết cơ khí cho đồ án');
+-- Trigger tự sinh mã CTNK000001, CTNK000002
+INSERT INTO tbChiTietYeuCauSuDung_NgoaiKhoa (YeuCauNo, KhoaPhongBanNo, TenTB, ThongSoKT, LyDo) VALUES ('YC00000002', 'KP2', N'Máy hàn TIG Jasic', N'Dòng hàn 200A, Hàn inox/sắt', N'Mượn máy hàn của Khoa Cơ khí để thi công Robocon');
+INSERT INTO tbChiTietYeuCauSuDung_NgoaiKhoa (YeuCauNo, KhoaPhongBanNo, TenTB, ThongSoKT, LyDo) VALUES ('YC00000002', 'KP2', N'Máy phay CNC Mini', N'Hành trình 300x400mm', N'Mượn gia công chi tiết cơ khí cho đồ án');
 
--- CHI TIẾT YÊU CẦU SỬA CHỮA
-INSERT INTO tbChiTietYeuCau_SuaChua (YeuCauNo, ThietBiNo, HinhAnh, MoTa, LyDo) VALUES
-('YC00000003', 'TB00000001', 'img/tb001_hong.jpg', N'Bóng đèn mờ, quạt kêu to', N'Hư hỏng linh kiện sau thời gian sử dụng'),
-('YC00000003', 'TB00000004', NULL, N'Không lên nguồn', N'Hư nguồn'),
-('YC00000003', 'TB00000007', NULL, N'Module Analog lỗi', N'Cần thay module mới'),
-('YC00000006', 'TB00000002', 'img/tb002_loi.jpg', N'Màn hình xanh, không khởi động', N'Lỗi RAM hoặc ổ cứng'),
-('YC00000006', 'TB00000004', 'img/cnc_loi.jpg', N'Trục Z bị kẹt, sai số lớn', N'Cần hiệu chuẩn và bảo trì'),
-('YC00000006', 'TB00000006', NULL, N'Kênh 2 không hiển thị', N'Lỗi phần cứng');
+-- CHI TIẾT YÊU CẦU SỬA CHỮA (Khóa chính kép: YeuCauNo + ThietBiNo)
+INSERT INTO tbChiTietYeuCau_SuaChua (YeuCauNo, ThietBiNo, HinhAnh, MoTa, LyDo) VALUES ('YC00000003', 'TB00000001', 'img/tb001_hong.jpg', N'Bóng đèn mờ, quạt kêu to', N'Hư hỏng linh kiện sau thời gian sử dụng');
+INSERT INTO tbChiTietYeuCau_SuaChua (YeuCauNo, ThietBiNo, HinhAnh, MoTa, LyDo) VALUES ('YC00000003', 'TB00000004', NULL, N'Không lên nguồn', N'Hư nguồn');
+INSERT INTO tbChiTietYeuCau_SuaChua (YeuCauNo, ThietBiNo, HinhAnh, MoTa, LyDo) VALUES ('YC00000003', 'TB00000007', NULL, N'Module Analog lỗi', N'Cần thay module mới');
+INSERT INTO tbChiTietYeuCau_SuaChua (YeuCauNo, ThietBiNo, HinhAnh, MoTa, LyDo) VALUES ('YC00000006', 'TB00000002', 'img/tb002_loi.jpg', N'Màn hình xanh, không khởi động', N'Lỗi RAM hoặc ổ cứng');
+INSERT INTO tbChiTietYeuCau_SuaChua (YeuCauNo, ThietBiNo, HinhAnh, MoTa, LyDo) VALUES ('YC00000006', 'TB00000004', 'img/cnc_loi.jpg', N'Trục Z bị kẹt, sai số lớn', N'Cần hiệu chuẩn và bảo trì');
+INSERT INTO tbChiTietYeuCau_SuaChua (YeuCauNo, ThietBiNo, HinhAnh, MoTa, LyDo) VALUES ('YC00000006', 'TB00000006', NULL, N'Kênh 2 không hiển thị', N'Lỗi phần cứng');
 
--- CHI TIẾT YÊU CẦU MUA SẮM
-INSERT INTO tbChiTietYeuCau_Mua (ID_ChiTiet, YeuCauNo, TenTB, SoLuong, ThongSoKT, GiaDuKien, MucDoUuTien, DonViTinh, LyDo) VALUES
-('CTM0000001', 'YC00000005', N'Máy tính Dell Vostro', 10, N'Core i5 12th, RAM 16GB', 15000000, N'Cao', N'Bộ', N'Nâng cấp phòng máy B201'),
-('CTM0000002', 'YC00000005', N'Chuột máy tính', 20, N'Logitech B100', 100000, N'Thấp', N'Cái', N'Thay thế chuột hỏng'),
-('CTM0000003', 'YC00000005', N'Dây mạng CAT6', 3, N'Cuộn 300m', 2000000, N'Cao', N'Cái', N'Đi lại dây mạng phòng Lab'),
-('CTM0000004', 'YC00000005', N'Ổ cứng SSD', 10, N'Samsung 500GB', 1200000, N'Cao', N'Cái', N'Thay thế HDD cũ'),
-('CTM0000005', 'YC00000009', N'Màn hình 27 inch', 5, N'Dell Ultrasharp U2722D', 8000000, N'Trung bình', N'Cái', N'Trang bị cho phòng GV'),
-('CTM0000006', 'YC00000009', N'Loa hội trường', 2, N'JBL 1000W', 25000000, N'Thấp', N'Bộ', N'Trang bị hội trường C'),
-('CTM0000007', 'YC00000009', N'RAM 16GB', 10, N'DDR4 Bus 3200', 800000, N'Trung bình', N'Cái', N'Nâng cấp RAM máy cũ');
+-- CHI TIẾT YÊU CẦU MUA SẮM - Trigger tự sinh mã CTM0000001 -> CTM0000007
+INSERT INTO tbChiTietYeuCau_Mua (YeuCauNo, TenTB, SoLuong, ThongSoKT, GiaDuKien, MucDoUuTien, DonViTinh, LyDo) VALUES ('YC00000005', N'Máy tính Dell Vostro', 10, N'Core i5 12th, RAM 16GB', 15000000, N'Cao', N'Bộ', N'Nâng cấp phòng máy B201');
+INSERT INTO tbChiTietYeuCau_Mua (YeuCauNo, TenTB, SoLuong, ThongSoKT, GiaDuKien, MucDoUuTien, DonViTinh, LyDo) VALUES ('YC00000005', N'Chuột máy tính', 20, N'Logitech B100', 100000, N'Thấp', N'Cái', N'Thay thế chuột hỏng');
+INSERT INTO tbChiTietYeuCau_Mua (YeuCauNo, TenTB, SoLuong, ThongSoKT, GiaDuKien, MucDoUuTien, DonViTinh, LyDo) VALUES ('YC00000005', N'Dây mạng CAT6', 3, N'Cuộn 300m', 2000000, N'Cao', N'Cái', N'Đi lại dây mạng phòng Lab');
+INSERT INTO tbChiTietYeuCau_Mua (YeuCauNo, TenTB, SoLuong, ThongSoKT, GiaDuKien, MucDoUuTien, DonViTinh, LyDo) VALUES ('YC00000005', N'Ổ cứng SSD', 10, N'Samsung 500GB', 1200000, N'Cao', N'Cái', N'Thay thế HDD cũ');
+INSERT INTO tbChiTietYeuCau_Mua (YeuCauNo, TenTB, SoLuong, ThongSoKT, GiaDuKien, MucDoUuTien, DonViTinh, LyDo) VALUES ('YC00000009', N'Màn hình 27 inch', 5, N'Dell Ultrasharp U2722D', 8000000, N'Trung bình', N'Cái', N'Trang bị cho phòng GV');
+INSERT INTO tbChiTietYeuCau_Mua (YeuCauNo, TenTB, SoLuong, ThongSoKT, GiaDuKien, MucDoUuTien, DonViTinh, LyDo) VALUES ('YC00000009', N'Loa hội trường', 2, N'JBL 1000W', 25000000, N'Thấp', N'Bộ', N'Trang bị hội trường C');
+INSERT INTO tbChiTietYeuCau_Mua (YeuCauNo, TenTB, SoLuong, ThongSoKT, GiaDuKien, MucDoUuTien, DonViTinh, LyDo) VALUES ('YC00000009', N'RAM 16GB', 10, N'DDR4 Bus 3200', 800000, N'Trung bình', N'Cái', N'Nâng cấp RAM máy cũ');
 
--- CHI TIẾT YÊU CẦU BÀN GIAO
-INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBanGiao, NgayNhanThucTe, TrangThaiBanGiao, NguoiBanGiaoNo, NguoiNhanNo, GhiChu) VALUES
-('YC00000008', 'TB00000001', 'KP1', '2025-09-14', '2025-09-14', N'Đã giao', 'ND0006', 'ND0002', N'Bàn giao PC Dell cho Trưởng khoa'),
-('YC00000008', 'TB00000002', 'KP1', '2025-09-14', '2025-09-14', N'Đã giao', 'ND0006', 'ND0003', N'Bàn giao Workstation HP'),
-('YC00000008', 'TB00000003', 'KP1', '2025-09-14', NULL, N'Chưa giao', 'ND0006', 'ND0003', N'Chờ lắp đặt phòng'),
-('YC00000010', 'TB00000004', 'KP2', '2025-09-17', '2025-09-17', N'Đã giao', 'ND0006', 'ND0004', N'Bàn giao máy CNC về Khoa Cơ khí'),
-('YC00000010', 'TB00000005', 'KP2', '2025-09-17', '2025-09-17', N'Đã giao', 'ND0006', 'ND0004', N'Bàn giao máy hàn TIG'),
-('YC00000010', 'TB00000006', 'KP3', '2025-09-18', '2025-09-18', N'Đã giao', 'ND0006', 'ND0004', N'Bàn giao dao động ký'),
-('YC00000010', 'TB00000007', 'KP3', '2025-09-18', NULL, N'Chưa giao', 'ND0006', 'ND0003', N'PLC đang sửa chữa');
+-- CHI TIẾT YÊU CẦU BÀN GIAO (Khóa chính kép: YeuCauNo + ThietBiNo)
+INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBanGiao, NgayNhanThucTe, TrangThaiBanGiao, NguoiBanGiaoNo, NguoiNhanNo, GhiChu) VALUES ('YC00000008', 'TB00000001', 'KP1', '2025-09-14', '2025-09-14', N'Đã giao', 'ND0006', 'ND0002', N'Bàn giao PC Dell cho Trưởng khoa');
+INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBanGiao, NgayNhanThucTe, TrangThaiBanGiao, NguoiBanGiaoNo, NguoiNhanNo, GhiChu) VALUES ('YC00000008', 'TB00000002', 'KP1', '2025-09-14', '2025-09-14', N'Đã giao', 'ND0006', 'ND0003', N'Bàn giao Workstation HP');
+INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBanGiao, NgayNhanThucTe, TrangThaiBanGiao, NguoiBanGiaoNo, NguoiNhanNo, GhiChu) VALUES ('YC00000008', 'TB00000003', 'KP1', '2025-09-14', NULL, N'Chưa giao', 'ND0006', 'ND0003', N'Chờ lắp đặt phòng');
+INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBanGiao, NgayNhanThucTe, TrangThaiBanGiao, NguoiBanGiaoNo, NguoiNhanNo, GhiChu) VALUES ('YC00000010', 'TB00000004', 'KP2', '2025-09-17', '2025-09-17', N'Đã giao', 'ND0006', 'ND0004', N'Bàn giao máy CNC về Khoa Cơ khí');
+INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBanGiao, NgayNhanThucTe, TrangThaiBanGiao, NguoiBanGiaoNo, NguoiNhanNo, GhiChu) VALUES ('YC00000010', 'TB00000005', 'KP2', '2025-09-17', '2025-09-17', N'Đã giao', 'ND0006', 'ND0004', N'Bàn giao máy hàn TIG');
+INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBanGiao, NgayNhanThucTe, TrangThaiBanGiao, NguoiBanGiaoNo, NguoiNhanNo, GhiChu) VALUES ('YC00000010', 'TB00000006', 'KP3', '2025-09-18', '2025-09-18', N'Đã giao', 'ND0006', 'ND0004', N'Bàn giao dao động ký');
+INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBanGiao, NgayNhanThucTe, TrangThaiBanGiao, NguoiBanGiaoNo, NguoiNhanNo, GhiChu) VALUES ('YC00000010', 'TB00000007', 'KP3', '2025-09-18', NULL, N'Chưa giao', 'ND0006', 'ND0003', N'PLC đang sửa chữa');
 GO
