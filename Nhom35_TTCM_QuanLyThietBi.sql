@@ -1213,3 +1213,21 @@ RETURN (
 GO
 -- Thống kê cho Khoa CNTT - K01
 SELECT * FROM dbo.fn_ThongKeTrangThaiThietBi_TheoKhoa('K01');
+
+-- Thủ tục tự động đề xuất lịch bảo trì dự phòng
+GO
+CREATE PROCEDURE pr_DeXuatBaoTriDuPhong
+AS
+BEGIN
+    SELECT 
+        tb.ID_ThietBi, 
+        tb.TenTB,
+        SUM(t.ThoiLuong) AS TongPhutDaSuDung,
+        N'Cần bảo trì' AS TrangThaiDuKien
+    FROM tbThietBi tb
+    JOIN tbChiTietYeuCau_SuDung ct ON tb.ID_ThietBi = ct.ThietBiNo
+    JOIN tbTiet t ON ct.TietBDNo = t.ID_Tiet
+    GROUP BY tb.ID_ThietBi, tb.TenTB
+    HAVING SUM(t.ThoiLuong) > 7776000 -- Ngưỡng phút 
+END;
+GO
