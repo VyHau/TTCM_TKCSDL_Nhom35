@@ -995,26 +995,6 @@ END;
 GO
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- Thủ tục thống kế yêu cầu theo các tháng trong năm (được truyền vào)
-CREATE PROCEDURE pr_ThongKeYeuCauTheoThang
-    @Nam INT
-AS
-BEGIN
-    SELECT 
-        MONTH(NgayTao) AS Thang,
-        l.TenLoaiYeuCau,
-        COUNT(y.ID_YeuCau) AS TongSoYeuCau,
-        SUM(CASE WHEN y.TrangThai = N'Đã duyệt' THEN 1 ELSE 0 END) AS SoLuongDaDuyet
-    FROM tbYeuCau y
-    JOIN tbLoaiYeuCau l ON y.LoaiYeuCauNo = l.ID_LoaiYeuCau
-    WHERE YEAR(NgayTao) = @Nam
-    GROUP BY MONTH(NgayTao), l.TenLoaiYeuCau
-    ORDER BY Thang;
-END;
-GO
--- Thống kê yêu cầu của các tháng trong năm 2025
-EXEC pr_ThongKeYeuCauTheoThang @Nam = 2025;
-
 -- Hàm thống kê số lượng thiết bị theo trạng thái thiết bị
 GO
 CREATE FUNCTION fn_ThongKeThietBi_TatCaTrangThai()
@@ -1040,8 +1020,127 @@ RETURN (
     GROUP BY TrangThaiThietBi
 );
 GO
--- Thống kê cho Khoa CNTT - K01
-SELECT * FROM dbo.fn_ThongKeTrangThaiThietBi_TheoKhoa('K01');
+
+-- Hàm kiểm tra quyền hạn của người dùng
+GO
+CREATE FUNCTION fn_CheckQuyenNguoiDung (
+    @NguoiDungNo CHAR(6),
+    @TenQuyenHan NVARCHAR(50)
+)
+RETURNS BIT
+AS
+BEGIN
+    DECLARE @Result BIT = 0;
+    
+    IF EXISTS (
+        SELECT 1
+        FROM tbQuyenHan_VaiTro qhvt
+        INNER JOIN tbQuyenHan qh ON qhvt.QuyenHanNo = qh.ID_QuyenHan
+        INNER JOIN tbVaiTro_NguoiDung vtnd ON qhvt.VaiTroNo = vtnd.VaiTroNo
+        WHERE vtnd.NguoiDungNo = @NguoiDungNo
+            AND qh.TenQuyenHan = @TenQuyenHan
+            AND qhvt.TrangThai = 1
+            AND GETDATE() BETWEEN vtnd.NgayHieuLuc AND vtnd.NgayHetHieuLuc
+    )
+    BEGIN
+        SET @Result = 1;
+    END
+    
+    RETURN @Result;
+END;
+GO
+
+-- Hàm tính tổng giá trị thiết bị của khoa
+CREATE FUNCTION fn_TinhTongGiaTriThietBiKhoa (
+    @KhoaPhongBanNo CHAR(3)
+)
+RETURNS DECIMAL(15, 2)
+AS
+BEGIN
+    DECLARE @TongGiaTri DECIMAL(15, 2);
+    
+    SELECT @TongGiaTri = SUM(Gia)
+    FROM tbThietBi
+    WHERE KhoaPhongBan = @KhoaPhongBanNo
+        AND TrangThaiThietBi NOT IN (N'Đã thanh lý');
+    
+    RETURN ISNULL(@TongGiaTri, 0);
+END;
+GO
+
+-- Hàm đếm loại yêu cầu theo trạng thái và loại yêu cầu
+CREATE FUNCTION fn_CountYeuCauTheoLoaiVaTrangThai (
+    @LoaiYeuCauNo CHAR(10),
+    @TrangThai NVARCHAR(50)
+)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Count INT;
+    
+    SELECT @Count = COUNT(*)
+    FROM tbYeuCau
+    WHERE LoaiYeuCauNo = @LoaiYeuCauNo
+        AND TrangThai = @TrangThai;
+    
+    RETURN ISNULL(@Count, 0);
+END;
+GO
+
+-- Hàm thống kê số lượng thiết bị theo nhà cung cấp
+CREATE FUNCTION fn_ThongKeThietBiTheoNhaCC (
+    @KhoaPhongBanNo CHAR(3)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT 
+        ncc.TenNhaCC,
+        COUNT(tb.ID_ThietBi) AS SoLuongThietBi,
+        SUM(tb.Gia) AS TongGiaTri
+    FROM tbThietBi tb
+    INNER JOIN tbNhaCungCap ncc ON tb.NhaCCNo = ncc.ID_NhaCC
+    WHERE tb.KhoaPhongBan = @KhoaPhongBanNo
+    GROUP BY ncc.TenNhaCC
+);
+GO
+
+-- Thủ tục thống kế yêu cầu theo các tháng trong năm (được truyền vào)
+CREATE PROCEDURE pr_ThongKeYeuCauTheoThang
+    @Nam INT
+AS
+BEGIN
+    SELECT 
+        MONTH(NgayTao) AS Thang,
+        l.TenLoaiYeuCau,
+        COUNT(y.ID_YeuCau) AS TongSoYeuCau,
+        SUM(CASE WHEN y.TrangThai = N'Đã duyệt' THEN 1 ELSE 0 END) AS SoLuongDaDuyet
+    FROM tbYeuCau y
+    JOIN tbLoaiYeuCau l ON y.LoaiYeuCauNo = l.ID_LoaiYeuCau
+    WHERE YEAR(NgayTao) = @Nam
+    GROUP BY MONTH(NgayTao), l.TenLoaiYeuCau
+    ORDER BY Thang;
+END;
+GO
+
+-- Thủ tục thống kê tổng giá trị của mỗi khoa trong trường
+CREATE PROCEDURE pr_BaoCaoGiaTriTaiSanTheoKhoa
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        ID_KhoaPhongBan,
+        TenPhongBanKhoa,
+        -- Sử dụng hàm của bạn để tính tổng giá trị
+        dbo.fn_TinhTongGiaTriThietBiKhoa(ID_KhoaPhongBan) AS TongGiaTriHienCo,
+        -- Thống kê thêm số lượng thiết bị để báo cáo đầy đủ hơn
+        (SELECT COUNT(*) FROM tbThietBi WHERE KhoaPhongBan = ID_KhoaPhongBan AND TrangThaiThietBi <> N'Đã thanh lý') AS SoLuongThietBi
+    FROM tbKhoa_PhongBan
+    ORDER BY TongGiaTriHienCo DESC;
+END;
+GO
 
 -- Thủ tục tự động đề xuất lịch bảo trì dự phòng
 GO
@@ -1060,7 +1159,6 @@ BEGIN
     HAVING SUM(t.ThoiLuong) > 7776000 -- Ngưỡng phút 
 END;
 GO
-
 
 -- tbQuyenHan (QH001 -> QH007)
 INSERT INTO tbQuyenHan (TenQuyenHan, MoTa) VALUES (N'Xem', N'Chỉ được xem dữ liệu');
@@ -1299,96 +1397,3 @@ INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBa
 INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBanGiao, NgayNhanThucTe, TrangThaiBanGiao, NguoiBanGiaoNo, NguoiNhanNo, GhiChu) VALUES ('YC00000011', 'TB00000017', 'KP3', '2025-09-18', NULL, N'Chưa giao', 'ND0006', 'ND0003', NULL);
 GO
 
-
-CREATE FUNCTION fn_CheckQuyenNguoiDung (
-    @NguoiDungNo CHAR(6),
-    @TenQuyenHan NVARCHAR(50)
-)
-RETURNS BIT
-AS
-BEGIN
-    DECLARE @Result BIT = 0;
-    
-    IF EXISTS (
-        SELECT 1
-        FROM tbQuyenHan_VaiTro qhvt
-        INNER JOIN tbQuyenHan qh ON qhvt.QuyenHanNo = qh.ID_QuyenHan
-        INNER JOIN tbVaiTro_NguoiDung vtnd ON qhvt.VaiTroNo = vtnd.VaiTroNo
-        WHERE vtnd.NguoiDungNo = @NguoiDungNo
-            AND qh.TenQuyenHan = @TenQuyenHan
-            AND qhvt.TrangThai = 1
-            AND GETDATE() BETWEEN vtnd.NgayHieuLuc AND vtnd.NgayHetHieuLuc
-    )
-    BEGIN
-        SET @Result = 1;
-    END
-    
-    RETURN @Result;
-END;
-GO
-
-
-CREATE FUNCTION fn_TinhTongGiaTriThietBiKhoa (
-    @KhoaPhongBanNo CHAR(3)
-)
-RETURNS DECIMAL(15, 2)
-AS
-BEGIN
-    DECLARE @TongGiaTri DECIMAL(15, 2);
-    
-    SELECT @TongGiaTri = SUM(Gia)
-    FROM tbThietBi
-    WHERE KhoaPhongBan = @KhoaPhongBanNo
-        AND TrangThaiThietBi NOT IN (N'Đã thanh lý');
-    
-    RETURN ISNULL(@TongGiaTri, 0);
-END;
-GO
-
-CREATE FUNCTION fn_CountYeuCauTheoLoaiVaTrangThai (
-    @LoaiYeuCauNo CHAR(10),
-    @TrangThai NVARCHAR(50)
-)
-RETURNS INT
-AS
-BEGIN
-    DECLARE @Count INT;
-    
-    SELECT @Count = COUNT(*)
-    FROM tbYeuCau
-    WHERE LoaiYeuCauNo = @LoaiYeuCauNo
-        AND TrangThai = @TrangThai;
-    
-    RETURN ISNULL(@Count, 0);
-END;
-GO
-
-CREATE FUNCTION fn_ThongKeThietBiTheoNhaCC (
-    @KhoaPhongBanNo CHAR(3)
-)
-RETURNS TABLE
-AS
-RETURN
-(
-    SELECT 
-        ncc.TenNhaCC,
-        COUNT(tb.ID_ThietBi) AS SoLuongThietBi,
-        SUM(tb.Gia) AS TongGiaTri
-    FROM tbThietBi tb
-    INNER JOIN tbNhaCungCap ncc ON tb.NhaCCNo = ncc.ID_NhaCC
-    WHERE tb.KhoaPhongBan = @KhoaPhongBanNo
-    GROUP BY ncc.TenNhaCC
-);
-GO
-
----Sử dụng hàm
-SELECT dbo.fn_CheckQuyenNguoiDung('ND0001', N'Thêm') AS CoQuyenXem;
-SELECT dbo.fn_CheckQuyenNguoiDung('ND0005', N'Thêm') AS CoQuyenThem;
-
-SELECT dbo.fn_TinhTongGiaTriThietBiKhoa('KP1') AS TongGiaTri;
-SELECT dbo.fn_TinhTongGiaTriThietBiKhoa('KP2') AS TongGiaTri;
-
-SELECT * FROM dbo.fn_ThongKeThietBiTheoNhaCC('KP1');
-
-SELECT dbo.fn_CountYeuCauTheoLoaiVaTrangThai('LYC0000001', N'Đã duyệt') AS YeuCauDaDuyet;
-SELECT dbo.fn_CountYeuCauTheoLoaiVaTrangThai('LYC0000003', N'Chờ xử lý') AS YeuCauChoXuLy;
