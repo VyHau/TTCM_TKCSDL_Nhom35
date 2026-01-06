@@ -561,11 +561,8 @@ BEGIN
 END;
 GO
 
--- =============================================
--- TRIGGER
--- =============================================
-
--- Trigger sinh mã tự động cho bảng tbQuyenHan
+-----------------------------------------------------------------------------------------------------------------------------TRIGGER-----------------------------------------------------------------------------------------------------------------
+--1. Trigger sinh mã tự động cho bảng tbQuyenHan
 CREATE TRIGGER trg_tbQuyenHan_Insert_SinhMa
 ON tbQuyenHan
 INSTEAD OF INSERT
@@ -580,7 +577,7 @@ BEGIN
 END;
 GO
 
--- Trigger sinh mã tự động cho bảng tbVaiTro
+--2. Trigger sinh mã tự động cho bảng tbVaiTro
 CREATE TRIGGER trg_tbVaiTro_Insert_SinhMa
 ON tbVaiTro
 INSTEAD OF INSERT
@@ -595,7 +592,7 @@ BEGIN
 END;
 GO
 
--- Trigger sinh mã tự động cho bảng tbNguoiDung
+--3. Trigger sinh mã tự động cho bảng tbNguoiDung
 CREATE TRIGGER trg_tbNguoiDung_Insert_SinhMa
 ON tbNguoiDung
 INSTEAD OF INSERT
@@ -610,7 +607,7 @@ BEGIN
 END;
 GO
 
--- Trigger sinh mã tự động cho bảng tbThietBi
+--4. Trigger sinh mã tự động cho bảng tbThietBi
 CREATE TRIGGER trg_tbThietBi_Insert_SinhMa
 ON tbThietBi
 INSTEAD OF INSERT
@@ -625,7 +622,7 @@ BEGIN
 END;
 GO
 
--- Trigger sinh mã tự động cho bảng tbKhoa_PhongBan
+--5. Trigger sinh mã tự động cho bảng tbKhoa_PhongBan
 CREATE TRIGGER trg_tbKhoaPhongBan_Insert_SinhMa
 ON tbKhoa_PhongBan
 INSTEAD OF INSERT
@@ -640,7 +637,7 @@ BEGIN
 END;
 GO
 
--- Trigger sinh mã tự động cho bảng tbTaiLieu
+--6. Trigger sinh mã tự động cho bảng tbTaiLieu
 CREATE TRIGGER trg_tbTaiLieu_Insert_SinhMa
 ON tbTaiLieu
 INSTEAD OF INSERT
@@ -655,7 +652,7 @@ BEGIN
 END;
 GO
 
--- Trigger sinh mã tự động cho bảng tbLoaiYeuCau
+--7. Trigger sinh mã tự động cho bảng tbLoaiYeuCau
 CREATE TRIGGER trg_tbLoaiYeuCau_Insert_SinhMa
 ON tbLoaiYeuCau
 INSTEAD OF INSERT
@@ -670,7 +667,7 @@ BEGIN
 END;
 GO
 
--- Trigger sinh mã tự động cho bảng tbYeuCau
+--8. Trigger sinh mã tự động cho bảng tbYeuCau
 CREATE TRIGGER trg_tbYeuCau_Insert_SinhMa
 ON tbYeuCau
 INSTEAD OF INSERT
@@ -685,7 +682,7 @@ BEGIN
 END;
 GO
 
--- Trigger sinh mã tự động cho bảng tbThongBao
+--9. Trigger sinh mã tự động cho bảng tbThongBao
 CREATE TRIGGER trg_tbThongBao_Insert_SinhMa
 ON tbThongBao
 INSTEAD OF INSERT
@@ -700,7 +697,7 @@ BEGIN
 END;
 GO
 
--- Trigger sinh mã tự động cho bảng tbDanhMuc
+--10. Trigger sinh mã tự động cho bảng tbDanhMuc
 CREATE TRIGGER trg_tbDanhMuc_Insert_SinhMa
 ON tbDanhMuc
 INSTEAD OF INSERT
@@ -715,7 +712,7 @@ BEGIN
 END;
 GO
 
--- Trigger sinh mã tự động cho bảng tbNhaCungCap
+--11. Trigger sinh mã tự động cho bảng tbNhaCungCap
 CREATE TRIGGER trg_tbNhaCungCap_Insert_SinhMa
 ON tbNhaCungCap
 INSTEAD OF INSERT
@@ -730,7 +727,7 @@ BEGIN
 END;
 GO
 
--- Trigger sinh mã tự động cho bảng tbTiet
+--12. Trigger sinh mã tự động cho bảng tbTiet
 CREATE TRIGGER trg_tbTiet_Insert_SinhMa
 ON tbTiet
 INSTEAD OF INSERT
@@ -745,7 +742,7 @@ BEGIN
 END;
 GO
 
--- Trigger sinh mã tự động cho bảng tbPhong
+--13. Trigger sinh mã tự động cho bảng tbPhong
 CREATE TRIGGER trg_tbPhong_Insert_SinhMa
 ON tbPhong
 INSTEAD OF INSERT
@@ -760,7 +757,7 @@ BEGIN
 END;
 GO
 
--- Trigger sinh mã tự động cho bảng tbKhuVuc
+--14. Trigger sinh mã tự động cho bảng tbKhuVuc
 CREATE TRIGGER trg_tbKhuVuc_Insert_SinhMa
 ON tbKhuVuc
 INSTEAD OF INSERT
@@ -775,7 +772,7 @@ BEGIN
 END;
 GO
 
--- Trigger sinh mã tự động cho bảng tbCoSo
+--15. Trigger sinh mã tự động cho bảng tbCoSo
 CREATE TRIGGER trg_tbCoSo_Insert_SinhMa
 ON tbCoSo
 INSTEAD OF INSERT
@@ -790,7 +787,7 @@ BEGIN
 END;
 GO
 
--- Trigger sinh mã tự động cho bảng tbChiTietYeuCau_Mua
+--16. Trigger sinh mã tự động cho bảng tbChiTietYeuCau_Mua
 CREATE TRIGGER trg_tbChiTietMua_Insert_SinhMa
 ON tbChiTietYeuCau_Mua
 INSTEAD OF INSERT
@@ -805,7 +802,7 @@ BEGIN
 END;
 GO
 
--- Trigger sinh mã tự động cho bảng tbChiTietYeuCauSuDung_NgoaiKhoa
+--17. Trigger sinh mã tự động cho bảng tbChiTietYeuCauSuDung_NgoaiKhoa
 CREATE TRIGGER trg_tbChiTietNgoaiKhoa_Insert_SinhMa
 ON tbChiTietYeuCauSuDung_NgoaiKhoa
 INSTEAD OF INSERT
@@ -820,8 +817,7 @@ BEGIN
 END;
 GO
 
--- ============================================
--- Trigger tự động cập nhật ngày tạo và insert tbThongBao_NguoiDung khi thêm thông báo
+--18. Trigger tự động cập nhật ngày tạo và insert tbThongBao_NguoiDung khi thêm thông báo
 CREATE TRIGGER trg_tbThongBao_Insert_ThongBaoNguoiDung
 On tbThongBao
 AFTER INSERT
@@ -837,8 +833,8 @@ BEGIN
 END;
 GO
 
--- Trigger chặn xóa thiết bị, thay trạng thái thành 'Đã thanh lý'
-CREATE TRIGGER trg_tbThietBi_Delete_ThanhLy
+--19. Trigger chặn xóa thiết bị, thay trạng thái thành 'Đã thanh lý'
+CREATE TRIGGER trg_tbThietBi_NganXoaThietBi
 ON tbThietBi
 INSTEAD OF DELETE
 AS
@@ -846,18 +842,14 @@ BEGIN
     SET NOCOUNT ON;
 
     UPDATE tbThietBi
-    SET TrangThaiThietBi = N'Đã thanh lý'
+    SET TrangThaiThietBi = N'Thanh lý'
     FROM tbThietBi t
     INNER JOIN deleted d
         ON t.ID_ThietBi = d.ID_ThietBi;
 END;
 GO
 
--- =============================================
--- MOCK DATA
--- =============================================
-
--- Trigger cập nhật thông tin khi bàn giao
+--20. Trigger cập nhật thông tin khi bàn giao
 CREATE TRIGGER trg_ChiTietBanGiao_DaBanGiao
 ON tbChiTietYeuCau_BanGiao
 AFTER UPDATE
@@ -892,7 +884,21 @@ BEGIN
 END;
 GO
 
--- Trigger khi update tbYeuCau (trạng thái) => cập nhật trạng thái thiết bị
+--21. Trigger cập nhật trạng thái thiết bị 'Hư hỏng' khi có báo cáo sửa chữa thiết bị
+CREATE TRIGGER trg_tbChiTietSuaChua_Insert_UpdateTB
+ON tbChiTietYeuCau_SuaChua
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    UPDATE tb
+    SET tb.TrangThaiThietBi = N'Hư hỏng'
+    FROM tbThietBi tb
+    INNER JOIN inserted i ON tb.ID_ThietBi = i.ThietBiNo;
+END;
+GO
+
+--22. Trigger khi update tbYeuCau (trạng thái) => cập nhật trạng thái thiết bị
 CREATE TRIGGER trg_tbYeuCau_CapNhatTrangThaiTB
 ON tbYeuCau
 AFTER INSERT, UPDATE
@@ -900,15 +906,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- 1. Khi tạo yêu cầu sửa chữa
-    UPDATE tbThietBi
-    SET TrangThaiThietBi = N'Hư hỏng'
-    FROM tbThietBi tb
-    JOIN tbChiTietYeuCau_SuaChua ct ON tb.ID_ThietBi = ct.ThietBiNo
-    JOIN inserted i ON ct.YeuCauNo = i.ID_YeuCau
-    WHERE i.LoaiYeuCauNo = 'LYC0000003' AND i.TrangThai = N'Chờ xử lý';
-
-    -- 2. Khi duyệt yêu cầu sửa chữa
+    -- 1. Khi duyệt yêu cầu sửa chữa
     UPDATE tbThietBi
     SET TrangThaiThietBi = N'Sửa chữa'
     FROM tbThietBi tb
@@ -917,7 +915,7 @@ BEGIN
     JOIN deleted d ON i.ID_YeuCau = d.ID_YeuCau
     WHERE i.LoaiYeuCauNo = 'LYC0000003' AND d.TrangThai = N'Chờ xử lý' AND i.TrangThai = N'Đã duyệt';
 
-    -- 3. Khi hoàn thành yêu cầu sửa chữa
+    -- 2. Khi hoàn thành yêu cầu sửa chữa
     UPDATE tbThietBi
     SET TrangThaiThietBi = N'Sẵn sàng'
     FROM tbThietBi tb
@@ -927,7 +925,7 @@ BEGIN
 END;
 GO
 
--- Trigger tạo thông báo tự động khi cập nhật trạng thái yêu cầu
+--23. Trigger tạo thông báo tự động khi cập nhật trạng thái yêu cầu
 CREATE TRIGGER trg_YeuCau_ThongBaoHeThong
 ON tbYeuCau
 AFTER UPDATE
@@ -965,21 +963,20 @@ BEGIN
 END
 GO
     
--- Trigger kiểm tra trùng lịch mượn khi INSERT vào tbChiTietYeuCau_SuDung
+--24. Trigger kiểm tra trùng lịch mượn khi INSERT vào tbChiTietYeuCau_SuDung
 CREATE TRIGGER trg_ChiTietSuDung_Insert_KiemTraTrung
 ON tbChiTietYeuCau_SuDung
 INSTEAD OF INSERT
 AS
 BEGIN
     SET NOCOUNT ON;
-
     -- Kiểm tra trùng: cùng thiết bị, cùng ngày, có tiết giao nhau
     IF EXISTS (
         SELECT 1
         FROM inserted i
         INNER JOIN tbChiTietYeuCau_SuDung ct ON i.ThietBiNo = ct.ThietBiNo AND i.NgayMuon = ct.NgayMuon
         INNER JOIN tbYeuCau yc ON ct.YeuCauNo = yc.ID_YeuCau
-        WHERE yc.TrangThai NOT IN (N'Từ chối', N'Đã hủy', N'Hoàn Thành') AND ((i.TietBDNo <= ct.TietKTNo) AND (i.TietKTNo >= ct.TietBDNo))
+        WHERE yc.TrangThai = N'Đã duyệt' AND ((i.TietBDNo <= ct.TietKTNo) AND (i.TietKTNo >= ct.TietBDNo))
     )
     BEGIN
         RAISERROR(N'Thiết bị đã được mượn trong khoảng thời gian này. Vui lòng chọn thời gian khác.', 16, 1);
@@ -994,8 +991,69 @@ BEGIN
 END;
 GO
 
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- Hàm thống kê số lượng thiết bị theo trạng thái thiết bị
+--25. Trigger khi cập nhật trạng thái "Đã huỷ" cho yêu cầu thì phải kiểm tra xem nếu yêu cầu đó còn ở trạng thái "Chờ xử lý" thì mới cho huỷ.
+GO
+CREATE TRIGGER trg_tbYeuCau_HuyYeuCau
+ON tbYeuCau
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM inserted i JOIN deleted d ON i.ID_YeuCau = d.ID_YeuCau 
+               WHERE i.TrangThai = N'Đã hủy' AND d.TrangThai <> N'Đã hủy')
+    BEGIN
+        IF EXISTS (
+            SELECT 1 
+            FROM inserted i 
+            JOIN deleted d ON i.ID_YeuCau = d.ID_YeuCau
+            WHERE i.TrangThai = N'Đã hủy' AND d.TrangThai <> N'Chờ xử lý'
+        )
+        BEGIN
+            RAISERROR(N'Yêu cầu đã được xét duyệt hoặc xử lý. Bạn không thể hủy yêu cầu này!', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
+
+        UPDATE tbThietBi
+        SET TrangThaiThietBi = N'Sẵn sàng'
+        FROM tbThietBi tb
+        INNER JOIN tbChiTietYeuCau_SuaChua ct ON tb.ID_ThietBi = ct.ThietBiNo
+        INNER JOIN inserted i ON ct.YeuCauNo = i.ID_YeuCau
+        WHERE i.LoaiYeuCauNo = 'LYC0000003' AND i.TrangThai = N'Đã hủy';
+        
+    END
+END;
+GO
+
+--26. Trigger kiểm tra tình trạng thiết bị trước khi thanh lý (nếu thiết bị ơr trạng thái sửa chữa/có lịch được sử dụng trong tương lại/hiện tại đã được duyệt) thì không được thanh lý
+GO
+CREATE TRIGGER trg_tbThietBi_CheckThanhLy
+ON tbThietBi
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF UPDATE(TrangThaiThietBi)
+    BEGIN
+        IF EXISTS (
+            SELECT 1 
+            FROM inserted i
+            LEFT JOIN tbChiTietYeuCau_SuDung ct ON i.ID_ThietBi = ct.ThietBiNo
+            LEFT JOIN tbYeuCau y ON ct.YeuCauNo = y.ID_YeuCau
+            WHERE i.TrangThaiThietBi = N'Thanh lý' AND ( i.TrangThaiThietBi IN (N'Đang sử dụng', N'Sửa chữa') OR ( y.TrangThai = N'Đã duyệt' AND ct.NgayMuon >= CAST(GETDATE() AS DATE)))
+        )
+        BEGIN
+            RAISERROR(N'Không thể thanh lý thiết bị vì đang có lịch mượn đã duyệt hoặc máy đang trong quá trình sử dụng/sửa chữa!', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
+    END
+END;
+GO
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--1. Hàm thống kê số lượng thiết bị theo trạng thái thiết bị
 GO
 CREATE FUNCTION fn_ThongKeThietBi_TatCaTrangThai()
 RETURNS TABLE
@@ -1008,7 +1066,7 @@ RETURN (
 GO
 SELECT * FROM dbo.fn_ThongKeThietBi_TatCaTrangThai();
 
--- Hàm thống kê số lượng thiết bị theo trạng thái cho từng khoa
+--2. Hàm thống kê số lượng thiết bị theo trạng thái cho từng khoa
 GO
 CREATE FUNCTION fn_ThongKeTrangThaiThietBi_TheoKhoa (@MaKhoa CHAR(3))
 RETURNS TABLE
@@ -1021,7 +1079,7 @@ RETURN (
 );
 GO
 
--- Hàm kiểm tra quyền hạn của người dùng
+--3. Hàm kiểm tra quyền hạn của người dùng
 GO
 CREATE FUNCTION fn_CheckQuyenNguoiDung (
     @NguoiDungNo CHAR(6),
@@ -1037,10 +1095,7 @@ BEGIN
         FROM tbQuyenHan_VaiTro qhvt
         INNER JOIN tbQuyenHan qh ON qhvt.QuyenHanNo = qh.ID_QuyenHan
         INNER JOIN tbVaiTro_NguoiDung vtnd ON qhvt.VaiTroNo = vtnd.VaiTroNo
-        WHERE vtnd.NguoiDungNo = @NguoiDungNo
-            AND qh.TenQuyenHan = @TenQuyenHan
-            AND qhvt.TrangThai = 1
-            AND GETDATE() BETWEEN vtnd.NgayHieuLuc AND vtnd.NgayHetHieuLuc
+        WHERE vtnd.NguoiDungNo = @NguoiDungNo AND qh.TenQuyenHan = @TenQuyenHan AND qhvt.TrangThai = 1 AND GETDATE() BETWEEN vtnd.NgayHieuLuc AND vtnd.NgayHetHieuLuc
     )
     BEGIN
         SET @Result = 1;
@@ -1050,7 +1105,7 @@ BEGIN
 END;
 GO
 
--- Hàm tính tổng giá trị thiết bị của khoa
+--4. Hàm tính tổng giá trị thiết bị của khoa
 CREATE FUNCTION fn_TinhTongGiaTriThietBiKhoa (
     @KhoaPhongBanNo CHAR(3)
 )
@@ -1068,26 +1123,22 @@ BEGIN
 END;
 GO
 
--- Hàm đếm loại yêu cầu theo trạng thái và loại yêu cầu
-CREATE FUNCTION fn_CountYeuCauTheoLoaiVaTrangThai (
-    @LoaiYeuCauNo CHAR(10),
+--5. Hàm đếm loại yêu cầu theo trạng thái và loại yêu cầu
+GO
+CREATE FUNCTION fn_PhanTichYeuCauTheoTrangThai (
     @TrangThai NVARCHAR(50)
 )
-RETURNS INT
+RETURNS TABLE
 AS
-BEGIN
-    DECLARE @Count INT;
-    
-    SELECT @Count = COUNT(*)
-    FROM tbYeuCau
-    WHERE LoaiYeuCauNo = @LoaiYeuCauNo
-        AND TrangThai = @TrangThai;
-    
-    RETURN ISNULL(@Count, 0);
-END;
+RETURN (
+    SELECT l.TenLoaiYeuCau, COUNT(y.ID_YeuCau) AS SoLuong, FORMAT(CAST(COUNT(y.ID_YeuCau) AS FLOAT) / NULLIF((SELECT COUNT(*) FROM tbYeuCau WHERE TrangThai = @TrangThai), 0), 'P') AS TyLeTrongTrangThai
+    FROM tbLoaiYeuCau l
+    LEFT JOIN tbYeuCau y ON l.ID_LoaiYeuCau = y.LoaiYeuCauNo AND y.TrangThai = @TrangThai
+    GROUP BY l.TenLoaiYeuCau
+);
 GO
 
--- Hàm thống kê số lượng thiết bị theo nhà cung cấp
+--6. Hàm thống kê số lượng thiết bị theo nhà cung cấp
 CREATE FUNCTION fn_ThongKeThietBiTheoNhaCC (
     @KhoaPhongBanNo CHAR(3)
 )
@@ -1106,7 +1157,7 @@ RETURN
 );
 GO
 
--- Thủ tục thống kế yêu cầu theo các tháng trong năm (được truyền vào)
+--7. Thủ tục thống kế yêu cầu theo các tháng trong năm (được truyền vào)
 CREATE PROCEDURE pr_ThongKeYeuCauTheoThang
     @Nam INT
 AS
@@ -1124,7 +1175,7 @@ BEGIN
 END;
 GO
 
--- Thủ tục thống kê tổng giá trị của mỗi khoa trong trường
+--8. Thủ tục thống kê tổng giá trị của mỗi khoa trong trường
 CREATE PROCEDURE pr_BaoCaoGiaTriTaiSanTheoKhoa
 AS
 BEGIN
@@ -1142,7 +1193,7 @@ BEGIN
 END;
 GO
 
--- Thủ tục tự động đề xuất lịch bảo trì dự phòng
+--9. Thủ tục tự động đề xuất lịch bảo trì dự phòng
 GO
 CREATE PROCEDURE pr_DeXuatBaoTriDuPhong
 AS
@@ -1312,6 +1363,7 @@ INSERT INTO tbThietBi (DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi
 INSERT INTO tbThietBi (DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri) VALUES ('DM00000002', 'NCC0000002', 'KP6', N'Máy chiếu Epson EB-L200F', N'Sẵn sàng', 32000000, N'Full HD, 4500 Lumens, Wireless', 'SN-EPSON-L200F');
 INSERT INTO tbThietBi (DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri) VALUES ('DM00000002', 'NCC0000003', 'KP5', N'Tivi LG 75 inch Commercial', N'Sẵn sàng', 38000000, N'4K UHD, WebOS, Hotel mode', 'SN-LG-75UR640');
 INSERT INTO tbThietBi (DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri) VALUES ('DM00000007', 'NCC0000003', 'KP6', N'Loa column TOA TZ-406', N'Thanh lý', 12000000, N'40W, 4 loa 4 inch, Hội trường', 'SN-TOA-TZ406');
+INSERT INTO tbThietBi (DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri) VALUES ('DM00000001', 'NCC0000001', 'KP2', N'Máy tính window XP 2016', N'Sẵn sàng', 7000000, N'120 GB, dung lượng 120', 'SN-657-974');
 GO
 
 -- tbPhong_ThietBi (không có trigger)
@@ -1397,3 +1449,71 @@ INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBa
 INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBanGiao, NgayNhanThucTe, TrangThaiBanGiao, NguoiBanGiaoNo, NguoiNhanNo, GhiChu) VALUES ('YC00000011', 'TB00000017', 'KP3', '2025-09-18', NULL, N'Chưa giao', 'ND0006', 'ND0003', NULL);
 GO
 
+---------------------------------------------------------------------------------------KỊCH BẢN TEST TRIGGER, FUNCTION AND PROCEDURE------------------------------------------------------------------------------------------------------------------------------------
+--TEST TRIGGER trg_tbYeuCau_CapNhatTrangThaiTB
+INSERT INTO tbYeuCau (NguoiTaoNo, LoaiYeuCauNo, TrangThai, NgayTao) 
+VALUES ('ND0003', 'LYC0000003', N'Chờ xử lý', GETDATE());
+
+-- Lấy mã YC vừa tạo để chèn chi tiết
+DECLARE @MaYC_Sua CHAR(10) = (SELECT TOP 1 ID_YeuCau FROM tbYeuCau ORDER BY ID_YeuCau DESC);
+INSERT INTO tbChiTietYeuCau_SuaChua (YeuCauNo, ThietBiNo, MoTa, LyDo) 
+VALUES (@MaYC_Sua, 'TB00000017', N'Lỗi nguồn', N'Sửa để thực hiện công tác giảng dạy môn thực hành lập trình');
+
+-- Kiểm tra: Trạng thái TB00000017 tự chuyển sang 'Hư hỏng'
+SELECT ID_ThietBi, TenTB, TrangThaiThietBi FROM tbThietBi WHERE ID_ThietBi = 'TB00000017';
+
+-- Bước 2: Duyệt yêu cầu sửa chữa => Trạng thái TB00000017 tự chuyển sang 'Sửa chữa'
+UPDATE tbYeuCau SET TrangThai = N'Đã duyệt' WHERE ID_YeuCau = @MaYC_Sua;
+SELECT ID_ThietBi, TenTB, TrangThaiThietBi FROM tbThietBi WHERE ID_ThietBi = 'TB00000017';
+
+-- Bước 3: Hoàn thành => Trạng thái TB00000017 tự chuyển sang 'Sẵn sàng'
+UPDATE tbYeuCau SET TrangThai = N'Hoàn Thành' WHERE ID_YeuCau = @MaYC_Sua;
+SELECT ID_ThietBi, TenTB, TrangThaiThietBi FROM tbThietBi WHERE ID_ThietBi = 'TB00000017';
+
+--TEST TRIGGER trg_ChiTietSuDung_Insert_KiemTraTrung
+INSERT INTO tbChiTietYeuCau_SuDung (YeuCauNo, ThietBiNo, TietBDNo, TietKTNo, LyDoMuon, NgayMuon) VALUES
+('YC00000001', 'TB00000005', 'T01', 'T03', N'Quay video thuyết trình môn Lập trình android', '2026-09-03'); --Thành công
+
+INSERT INTO tbChiTietYeuCau_SuDung (YeuCauNo, ThietBiNo, TietBDNo, TietKTNo, LyDoMuon, NgayMuon) VALUES
+('YC00000004', 'TB00000002', 'T01', 'T02', N'Làm đồ án tốt nghiệp', '2026-09-15'); --Thất bại
+
+--TEST TRIGGER trg_tbYeuCau_HuyYeuCau
+UPDATE tbYeuCau SET TrangThai = N'Đã hủy' WHERE ID_YeuCau = 'YC00000011' --Thành công
+
+UPDATE tbYeuCau SET TrangThai = N'Đã hủy' WHERE ID_YeuCau = 'YC00000006' --Thất bại
+
+--TEST trigger trg_tbThietBi_CheckThanhLy
+UPDATE tbThietBi SET TrangThaiThietBi = N'Thanh lý' WHERE ID_ThietBi = 'TB00000002' --Thất bại vì mặc dù thiết bị ở trạng thái sẵn sàng nhưng nó đã có lịch được mượn và đã được duyệt
+
+UPDATE tbThietBi SET TrangThaiThietBi = N'Thanh lý' WHERE ID_ThietBi = 'TB00000020' --Thành công
+
+--TEST TRIGGER ngăn không cho hành động xoá thiết bị xảy ra
+DELETE tbThietBi WHERE ID_ThietBi = 'TB00000014'
+
+-- 1. Thống kê thiết bị toàn trường
+SELECT * FROM dbo.fn_ThongKeThietBi_TatCaTrangThai();
+
+-- 2. Thống kê thiết bị của một khoa cụ thể (Ví dụ khoa CNTT - mã 'KP1')
+SELECT * FROM dbo.fn_ThongKeTrangThaiThietBi_TheoKhoa('KP1');
+
+-- 3. Kiểm tra quyền của một người dùng (Ví dụ ND0001 có quyền 'Quản trị' không?)
+-- Trả về 1 nếu có, 0 nếu không
+SELECT dbo.fn_CheckQuyenNguoiDung('ND0001', N'Quản trị') AS CoQuyenQuanTri;
+
+-- 4. Tính tổng giá trị tài sản hiện có của khoa Cơ khí (Mã 'KP2')
+SELECT dbo.fn_TinhTongGiaTriThietBiKhoa('KP2') AS TongGiaTri_KhoaCoKhi;
+
+-- 5. Phân tích các loại yêu cầu đang ở trạng thái 'Đã duyệt'
+SELECT * FROM dbo.fn_PhanTichYeuCauTheoTrangThai(N'Đã duyệt');
+
+-- 6. Thống kê thiết bị theo nhà cung cấp của khoa CNTT ('KP1')
+SELECT * FROM dbo.fn_ThongKeThietBiTheoNhaCC('KP1');
+
+-- 7. Thống kê yêu cầu theo tháng trong năm 2025
+EXEC pr_ThongKeYeuCauTheoThang @Nam = 2025;
+
+-- 8. Xuất báo cáo tổng giá trị tài sản của tất cả các khoa trong trường
+EXEC pr_BaoCaoGiaTriTaiSanTheoKhoa;
+
+-- 9. Chạy thuật toán đề xuất các thiết bị cần bảo trì dựa trên thời gian sử dụng
+EXEC pr_DeXuatBaoTriDuPhong;
