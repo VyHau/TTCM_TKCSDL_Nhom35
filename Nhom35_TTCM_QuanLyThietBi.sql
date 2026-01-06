@@ -1323,6 +1323,26 @@ INSERT INTO tbNguoiDung (KhoaPhongBanNo, VaiTroNo, Email, MatKhau, HoTen, NgaySi
 INSERT INTO tbNguoiDung (KhoaPhongBanNo, VaiTroNo, Email, MatKhau, HoTen, NgaySinh, TrangThaiTK) VALUES ('KP1', 'VT007', 'sv.cntt01@ute.udn.vn', '123', N'Hoàng Sinh Viên', '2003-11-25', 1);
 INSERT INTO tbNguoiDung (KhoaPhongBanNo, VaiTroNo, Email, MatKhau, HoTen, NgaySinh, TrangThaiTK) VALUES ('KP6', 'VT004', 'nv.csvc@ute.udn.vn', '123', N'Đỗ Cơ Sở', '1995-07-07', 1);
 INSERT INTO tbNguoiDung (KhoaPhongBanNo, VaiTroNo, Email, MatKhau, HoTen, NgaySinh, TrangThaiTK) VALUES ('KP7', 'VT005', 'nv.khtc@ute.udn.vn', '123', N'Vũ Tài Chính', '1993-12-12', 1);
+-- Thủ tục thống kê số lượng yêu cầu theo mỗi tháng của năm (được truyền vào)
+GO
+CREATE PROCEDURE pr_ThongKeYeuCauTheoThang
+    @Nam INT
+AS
+BEGIN
+    SELECT 
+        MONTH(NgayTao) AS Thang,
+        l.TenLoaiYeuCau,
+        COUNT(y.ID_YeuCau) AS TongSoYeuCau,
+        SUM(CASE WHEN y.TrangThai = N'Đã duyệt' THEN 1 ELSE 0 END) AS SoLuongDaDuyet
+    FROM tbYeuCau y
+    JOIN tbLoaiYeuCau l ON y.LoaiYeuCauNo = l.ID_LoaiYeuCau
+    WHERE YEAR(NgayTao) = @Nam
+    GROUP BY MONTH(NgayTao), l.TenLoaiYeuCau
+    ORDER BY Thang;
+END;
+GO
+-- Thống kê yêu cầu của các tháng trong năm 2025
+EXEC pr_ThongKeYeuCauTheoThang @Nam = 2025;
 
 -- Ghi nhận thời gian hiệu lực của vai trò người dùng
 INSERT INTO tbVaiTro_NguoiDung (VaiTroNo, NguoiDungNo, NgayHieuLuc, NgayHetHieuLuc) VALUES ('VT001', 'ND0001', '2023-01-01', '2030-01-01'); -- Admin
@@ -1446,4 +1466,51 @@ INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBa
 INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBanGiao, NgayNhanThucTe, TrangThaiBanGiao, NguoiBanGiaoNo, NguoiNhanNo, GhiChu) VALUES ('YC00000010', 'TB00000005', 'KP2', '2025-09-17', '2025-09-17', N'Đã giao', 'ND0006', 'ND0004', N'Bàn giao máy hàn TIG');
 INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBanGiao, NgayNhanThucTe, TrangThaiBanGiao, NguoiBanGiaoNo, NguoiNhanNo, GhiChu) VALUES ('YC00000010', 'TB00000006', 'KP3', '2025-09-18', '2025-09-18', N'Đã giao', 'ND0006', 'ND0004', N'Bàn giao dao động ký');
 INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBanGiao, NgayNhanThucTe, TrangThaiBanGiao, NguoiBanGiaoNo, NguoiNhanNo, GhiChu) VALUES ('YC00000010', 'TB00000007', 'KP3', '2025-09-18', NULL, N'Chưa giao', 'ND0006', 'ND0003', N'PLC đang sửa chữa');
+GO
+EXEC pr_BaoCaoThietBiSuCo
+
+-- Hàm thống kê số lượng thiết bị theo trạng thái thiết bị
+GO
+CREATE FUNCTION fn_ThongKeThietBi_TatCaTrangThai()
+RETURNS TABLE
+AS
+RETURN (
+    SELECT TrangThaiThietBi, COUNT(*) AS SoLuong, CAST(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM tbThietBi) AS DECIMAL(5,2)) AS TyLePhanTram
+    FROM tbThietBi
+    GROUP BY TrangThaiThietBi
+);
+GO
+SELECT * FROM dbo.fn_ThongKeThietBi_TatCaTrangThai();
+
+-- Hàm thống kê số lượng thiết bị theo trạng thái cho từng khoa
+GO
+CREATE FUNCTION fn_ThongKeTrangThaiThietBi_TheoKhoa (@MaKhoa CHAR(3))
+RETURNS TABLE
+AS
+RETURN (
+    SELECT TrangThaiThietBi, COUNT(*) AS SoLuong
+    FROM tbThietBi
+    WHERE KhoaPhongBan = @MaKhoa
+    GROUP BY TrangThaiThietBi
+);
+GO
+-- Thống kê cho Khoa CNTT - K01
+SELECT * FROM dbo.fn_ThongKeTrangThaiThietBi_TheoKhoa('K01');
+
+-- Thủ tục tự động đề xuất lịch bảo trì dự phòng
+GO
+CREATE PROCEDURE pr_DeXuatBaoTriDuPhong
+AS
+BEGIN
+    SELECT 
+        tb.ID_ThietBi, 
+        tb.TenTB,
+        SUM(t.ThoiLuong) AS TongPhutDaSuDung,
+        N'Cần bảo trì' AS TrangThaiDuKien
+    FROM tbThietBi tb
+    JOIN tbChiTietYeuCau_SuDung ct ON tb.ID_ThietBi = ct.ThietBiNo
+    JOIN tbTiet t ON ct.TietBDNo = t.ID_Tiet
+    GROUP BY tb.ID_ThietBi, tb.TenTB
+    HAVING SUM(t.ThoiLuong) > 7776000 -- Ngưỡng phút 
+END;
 GO
