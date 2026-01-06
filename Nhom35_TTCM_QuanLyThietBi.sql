@@ -1169,7 +1169,7 @@ BEGIN
     ORDER BY Thang;
 END;
 GO
--- Thống kê yêu cầu của năm 2025
+-- Thống kê yêu cầu của các tháng trong năm 2025
 EXEC pr_ThongKeYeuCauTheoThang @Nam = 2025;
 
 -- Thủ tục lấy danh sách các thiết bị hư hỏng/sửa chữa
@@ -1186,3 +1186,30 @@ END;
 GO
 EXEC pr_BaoCaoThietBiSuCo
 
+-- Hàm thống kê số lượng thiết bị theo trạng thái thiết bị
+GO
+CREATE FUNCTION fn_ThongKeThietBi_TatCaTrangThai()
+RETURNS TABLE
+AS
+RETURN (
+    SELECT TrangThaiThietBi, COUNT(*) AS SoLuong, CAST(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM tbThietBi) AS DECIMAL(5,2)) AS TyLePhanTram
+    FROM tbThietBi
+    GROUP BY TrangThaiThietBi
+);
+GO
+SELECT * FROM dbo.fn_ThongKeThietBi_TatCaTrangThai();
+
+-- Hàm thống kê số lượng thiết bị theo trạng thái cho từng khoa
+GO
+CREATE FUNCTION fn_ThongKeTrangThaiThietBi_TheoKhoa (@MaKhoa CHAR(3))
+RETURNS TABLE
+AS
+RETURN (
+    SELECT TrangThaiThietBi, COUNT(*) AS SoLuong
+    FROM tbThietBi
+    WHERE KhoaPhongBan = @MaKhoa
+    GROUP BY TrangThaiThietBi
+);
+GO
+-- Thống kê cho Khoa CNTT - K01
+SELECT * FROM dbo.fn_ThongKeTrangThaiThietBi_TheoKhoa('K01');
