@@ -226,6 +226,7 @@ CREATE TABLE tbLopHocPhan (
     ID_LHP CHAR(10) PRIMARY KEY,
     PhongNo CHAR(4),
     TietNo CHAR(3),
+    SoTC INT NOT NULL,
     Thu NVARCHAR(10) CHECK (Thu IN (N'Thứ 2', N'Thứ 3', N'Thứ 4', N'Thứ 5', N'Thứ 6', N'Thứ 7')),
     SiSo INT NOT NULL CHECK (SiSo > 0),
     TenLHP NVARCHAR(50) NOT NULL,
@@ -1211,6 +1212,27 @@ BEGIN
 END;
 GO
 
+--10. Hàm truy vấn lịch sử dụng của Thiết bị
+CREATE FUNCTION fn_XemLichDungThietBi(@MaTB CHAR(10))
+RETURNS TABLE
+AS
+RETURN (
+    -- 1. Lấy lịch mượn thiết bị từ các yêu cầu đã được duyệt
+    SELECT FORMAT(ct.NgayMuon, 'dd/MM/yyyy') AS Ngay_Hoac_Thu, N'Lịch mượn sử dụng' AS LoaiLich, ct.TietBDNo AS TietBatDau, ct.TietKTNo AS TietKetThuc
+    FROM tbChiTietYeuCau_SuDung ct
+    JOIN tbYeuCau y ON ct.YeuCauNo = y.ID_YeuCau
+    WHERE ct.ThietBiNo = @MaTB AND y.TrangThai = N'Đã duyệt'
+
+    UNION ALL
+
+    -- 2. Lấy lịch cố định của thiết bị nếu thiết bị đó được gán vào phòng có lớp học
+    SELECT lhp.Thu AS Ngay_Hoac_Thu, N'Lịch học cố định' AS LoaiLich,lhp.TietNo AS TietBatDau, 'T' + RIGHT('0' + CAST(CAST(RIGHT(lhp.TietNo, 2) AS INT) + lhp.SoTC - 1 AS VARCHAR(2)), 2) AS TietKetThuc
+    FROM tbLopHocPhan lhp
+    JOIN tbPhong_ThietBi ptb ON lhp.PhongNo = ptb.PhongNo
+    WHERE ptb.ThietBiNo = @MaTB
+);
+GO
+
 -- tbQuyenHan (QH001 -> QH007)
 INSERT INTO tbQuyenHan (TenQuyenHan, MoTa) VALUES (N'Xem', N'Chỉ được xem dữ liệu');
 INSERT INTO tbQuyenHan (TenQuyenHan, MoTa) VALUES (N'Thêm', N'Được phép thêm mới');
@@ -1340,8 +1362,9 @@ INSERT INTO tbPhong (KhuVucNo, TenPhong, SucChua) VALUES ('KV04', N'Xưởng th�
 INSERT INTO tbPhong (KhuVucNo, TenPhong, SucChua) VALUES ('KV05', N'Phòng Lab Cơ bản', 50);
 
 -- Lớp thực hành CSDL học tại phòng P001 vào tiết 1 thứ 2
-INSERT INTO tbLopHocPhan (ID_LHP, PhongNo, TietNo, Thu, SiSo, TenLHP, HocKy) VALUES ('LHP01', 'P001', 'T01', N'Thứ 2', 40, N'Thực hành CSDL Nhóm 35', N'1/2025-2026');
-INSERT INTO tbLopHocPhan (ID_LHP, PhongNo, TietNo, Thu, SiSo, TenLHP, HocKy) VALUES ('LHP02', 'P006', 'T06', N'Thứ 3', 30, N'Thực tập CNC', N'1/2025-2026');
+INSERT INTO tbLopHocPhan (ID_LHP, PhongNo, TietNo, SoTC, Thu, SiSo, TenLHP, HocKy) VALUES ('LHP01', 'P003', 'T01', 3,N'Thứ 2', 40, N'Thực hành CSDL', N'1/2025-2026');
+INSERT INTO tbLopHocPhan (ID_LHP, PhongNo, TietNo, SoTC, Thu, SiSo, TenLHP, HocKy) VALUES ('LHP03', 'P003', 'T07', 2,N'Thứ 3', 40, N'Công nghệ phần mềm', N'1/2025-2026');
+INSERT INTO tbLopHocPhan (ID_LHP, PhongNo, TietNo, SoTC,Thu, SiSo, TenLHP, HocKy) VALUES ('LHP02', 'P006', 'T06', 3,N'Thứ 3', 30, N'Thực tập CNC', N'1/2025-2026');
 
 -- tbThietBi (TB00000001 -> TB00000007) - Trigger tự sinh mã
 INSERT INTO tbThietBi (DanhMucNo, NhaCCNo, KhoaPhongBan, TenTB, TrangThaiThietBi, Gia, ThongSoKT, SoSeri) VALUES ('DM00000001', 'NCC0000001', 'KP1', N'PC Dell Optiplex 7090', N'Sẵn sàng', 15000000, N'Core i7-12700, RAM 16GB, SSD 512GB', 'SN-DELL-001');
@@ -1517,3 +1540,6 @@ EXEC pr_BaoCaoGiaTriTaiSanTheoKhoa;
 
 -- 9. Chạy thuật toán đề xuất các thiết bị cần bảo trì dựa trên thời gian sử dụng
 EXEC pr_DeXuatBaoTriDuPhong;
+
+-- 10. Hiển thị lịch sử dụng của thiết bị
+SELECT * FROM dbo.fn_XemLichDungThietBi('TB00000002');
