@@ -1289,3 +1289,97 @@ INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBa
 INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBanGiao, NgayNhanThucTe, TrangThaiBanGiao, NguoiBanGiaoNo, NguoiNhanNo, GhiChu) VALUES ('YC00000010', 'TB00000006', 'KP3', '2025-09-18', '2025-09-18', N'Đã giao', 'ND0006', 'ND0004', N'Bàn giao dao động ký');
 INSERT INTO tbChiTietYeuCau_BanGiao (YeuCauNo, ThietBiNo, PhongBanKhoaNo, NgayBanGiao, NgayNhanThucTe, TrangThaiBanGiao, NguoiBanGiaoNo, NguoiNhanNo, GhiChu) VALUES ('YC00000010', 'TB00000007', 'KP3', '2025-09-18', NULL, N'Chưa giao', 'ND0006', 'ND0003', N'PLC đang sửa chữa');
 GO
+
+
+CREATE FUNCTION fn_CheckQuyenNguoiDung (
+    @NguoiDungNo CHAR(6),
+    @TenQuyenHan NVARCHAR(50)
+)
+RETURNS BIT
+AS
+BEGIN
+    DECLARE @Result BIT = 0;
+    
+    IF EXISTS (
+        SELECT 1
+        FROM tbQuyenHan_VaiTro qhvt
+        INNER JOIN tbQuyenHan qh ON qhvt.QuyenHanNo = qh.ID_QuyenHan
+        INNER JOIN tbVaiTro_NguoiDung vtnd ON qhvt.VaiTroNo = vtnd.VaiTroNo
+        WHERE vtnd.NguoiDungNo = @NguoiDungNo
+            AND qh.TenQuyenHan = @TenQuyenHan
+            AND qhvt.TrangThai = 1
+            AND GETDATE() BETWEEN vtnd.NgayHieuLuc AND vtnd.NgayHetHieuLuc
+    )
+    BEGIN
+        SET @Result = 1;
+    END
+    
+    RETURN @Result;
+END;
+GO
+
+
+CREATE FUNCTION fn_TinhTongGiaTriThietBiKhoa (
+    @KhoaPhongBanNo CHAR(3)
+)
+RETURNS DECIMAL(15, 2)
+AS
+BEGIN
+    DECLARE @TongGiaTri DECIMAL(15, 2);
+    
+    SELECT @TongGiaTri = SUM(Gia)
+    FROM tbThietBi
+    WHERE KhoaPhongBan = @KhoaPhongBanNo
+        AND TrangThaiThietBi NOT IN (N'Đã thanh lý');
+    
+    RETURN ISNULL(@TongGiaTri, 0);
+END;
+GO
+
+CREATE FUNCTION fn_CountYeuCauTheoLoaiVaTrangThai (
+    @LoaiYeuCauNo CHAR(10),
+    @TrangThai NVARCHAR(50)
+)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Count INT;
+    
+    SELECT @Count = COUNT(*)
+    FROM tbYeuCau
+    WHERE LoaiYeuCauNo = @LoaiYeuCauNo
+        AND TrangThai = @TrangThai;
+    
+    RETURN ISNULL(@Count, 0);
+END;
+GO
+
+CREATE FUNCTION fn_ThongKeThietBiTheoNhaCC (
+    @KhoaPhongBanNo CHAR(3)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT 
+        ncc.TenNhaCC,
+        COUNT(tb.ID_ThietBi) AS SoLuongThietBi,
+        SUM(tb.Gia) AS TongGiaTri
+    FROM tbThietBi tb
+    INNER JOIN tbNhaCungCap ncc ON tb.NhaCCNo = ncc.ID_NhaCC
+    WHERE tb.KhoaPhongBan = @KhoaPhongBanNo
+    GROUP BY ncc.TenNhaCC
+);
+GO
+
+---Sử dụng hàm
+SELECT dbo.fn_CheckQuyenNguoiDung('ND0001', N'Thêm') AS CoQuyenXem;
+SELECT dbo.fn_CheckQuyenNguoiDung('ND0005', N'Thêm') AS CoQuyenThem;
+
+SELECT dbo.fn_TinhTongGiaTriThietBiKhoa('KP1') AS TongGiaTri;
+SELECT dbo.fn_TinhTongGiaTriThietBiKhoa('KP2') AS TongGiaTri;
+
+SELECT * FROM dbo.fn_ThongKeThietBiTheoNhaCC('KP1');
+
+SELECT dbo.fn_CountYeuCauTheoLoaiVaTrangThai('LYC0000001', N'Đã duyệt') AS YeuCauDaDuyet;
+SELECT dbo.fn_CountYeuCauTheoLoaiVaTrangThai('LYC0000003', N'Chờ xử lý') AS YeuCauChoXuLy;
