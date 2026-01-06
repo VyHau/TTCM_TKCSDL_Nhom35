@@ -1136,3 +1136,53 @@ BEGIN
     FROM inserted;
 END;
 GO
+
+-- Thủ tục thống kê thiết bị theo khoa
+GO
+CREATE PROCEDURE pr_ThongKeThietBiTheoKhoa
+AS
+BEGIN
+    SELECT k.TenPhongBanKhoa, tb.TrangThaiThietBi, COUNT(tb.ID_ThietBi) AS SoLuong, SUM(tb.Gia) AS TongGiaTri
+    FROM tbKhoa_PhongBan k
+    LEFT JOIN tbThietBi tb ON k.ID_KhoaPhongBan = tb.KhoaPhongBan
+    GROUP BY k.TenPhongBanKhoa, tb.TrangThaiThietBi
+    ORDER BY k.TenPhongBanKhoa;
+END;
+GO
+EXEC pr_ThongKeThietBiTheoKhoa;
+
+-- Thủ tục thống kê số lượng yêu cầu theo mỗi tháng của năm (được truyền vào)
+GO
+CREATE PROCEDURE pr_ThongKeYeuCauTheoThang
+    @Nam INT
+AS
+BEGIN
+    SELECT 
+        MONTH(NgayTao) AS Thang,
+        l.TenLoaiYeuCau,
+        COUNT(y.ID_YeuCau) AS TongSoYeuCau,
+        SUM(CASE WHEN y.TrangThai = N'Đã duyệt' THEN 1 ELSE 0 END) AS SoLuongDaDuyet
+    FROM tbYeuCau y
+    JOIN tbLoaiYeuCau l ON y.LoaiYeuCauNo = l.ID_LoaiYeuCau
+    WHERE YEAR(NgayTao) = @Nam
+    GROUP BY MONTH(NgayTao), l.TenLoaiYeuCau
+    ORDER BY Thang;
+END;
+GO
+-- Thống kê yêu cầu của năm 2025
+EXEC pr_ThongKeYeuCauTheoThang @Nam = 2025;
+
+-- Thủ tục lấy danh sách các thiết bị hư hỏng/sửa chữa
+GO
+CREATE PROCEDURE pr_BaoCaoThietBiSuCo
+AS
+BEGIN
+    SELECT tb.ID_ThietBi, tb.TenTB, tb.TrangThaiThietBi, ncc.TenNhaCC, ncc.SDT, sc.MoTa AS NoiDungHuHong
+    FROM tbThietBi tb
+    LEFT JOIN tbChiTietYeuCau_SuaChua sc ON tb.ID_ThietBi = sc.ThietBiNo
+    LEFT JOIN tbNhaCungCap ncc ON tb.NhaCCNo = ncc.ID_NhaCC
+    WHERE tb.TrangThaiThietBi IN (N'Hư hỏng', N'Sửa chữa');
+END;
+GO
+EXEC pr_BaoCaoThietBiSuCo
+
